@@ -4708,7 +4708,7 @@
 		"CLANG_ENABLE_MODULES" = YES;
 		"CODE_SIGN_ENTITLEMENTS" = "Easydict/App/Easydict.entitlements";
 		"CODE_SIGN_IDENTITY" = "$CODE_SIGN_IDENTITY";
-		"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+		"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 		"CODE_SIGN_STYLE" = Manual;
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
@@ -4716,7 +4716,7 @@
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 		"DEVELOPMENT_TEAM" = "";
-		"DEVELOPMENT_TEAM[sdk=macosx*]" = "";
+		"DEVELOPMENT_TEAM[sdk=macosx*]" = 9A84P4ZS84;
 		"ENABLE_APP_SANDBOX" = NO;
 		"ENABLE_DEBUG_DYLIB" = YES;
 		"ENABLE_HARDENED_RUNTIME" = YES;

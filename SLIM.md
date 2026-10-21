@@ -24,7 +24,9 @@
   - `Easydict 查询`：用选中文字打开查询窗口
   - `Easydict 翻译并替换`：用第一个启用的 Ollama / 自定义 OpenAI 服务翻译，直接替换选中文字（写邮件回复时用）
 - `⌥S` 默认改为“剪贴板翻译”：先用你自己的截图工具把截图复制到剪贴板，再按 `⌥S` 即可 OCR + 翻译。
-- Bundle ID 改为 `dev.enkin.EasydictSlim`，签名改为本机 ad-hoc，不会与官方版冲突，也不会被官方更新覆盖。
+- Bundle ID 改为 `dev.enkin.EasydictSlim`，不会与官方版冲突，也不会被官方更新覆盖。
+- Release 用自己的 Developer ID（Team `9A84P4ZS84`）签名并公证：签名身份固定，更新后不用重新授予辅助功能权限，
+  其他 Mac 下载后也能直接打开。Debug 仍是本机 ad-hoc 签名。
 
 以下服务的源码还留在工程里，但**没有注册、不会出现、不会联网**：有道、DeepL、Google、Bing、百度、OpenAI、Codex CLI。
 它们与语种识别、发音等模块耦合较深，等第一次编译通过后可以再逐个物理删除。
@@ -34,15 +36,33 @@
 需要 Xcode（macOS 13+）。
 
 ```bash
-cd Easydict
-open Easydict.xcworkspace        # 注意是 .xcworkspace
+open Easydict.xcworkspace        # 在仓库根目录执行，注意是 .xcworkspace
 ```
 
 1. 第一次打开时 Xcode 会重新解析 Swift Package（已删掉 Sparkle/Firebase/Sentry/Vapor），等它完成。
 2. Scheme 选 `Easydict`，`Product › Build`（⌘B）。
-3. 想要固定的签名（这样每次重新编译后不用重新授予辅助功能权限）：
-   Target `Easydict` › Signing & Capabilities › Team 选你自己的 Apple ID（免费的 Personal Team 也可以）。
-4. 把编译出来的 `Easydict.app` 拖到 `/Applications`，启动一次。
+3. 把编译出来的 `Easydict.app` 拖到 `/Applications`，启动一次。
+
+## 发布 DMG
+
+需要钥匙串里的 `Developer ID Application` 证书，以及有公证权限的 App Store Connect API Key
+（`AuthKey_<KeyID>.p8` 与 Issuer ID）。
+
+1. 归档通用版（arm64 + x86_64）：
+
+   ```bash
+   xcodebuild archive -workspace Easydict.xcworkspace -scheme Easydict -configuration Release \
+     -destination generic/platform=macOS -archivePath build/Easydict.xcarchive \
+     EASYDICT_RELEASE_PACKAGING=YES ENABLE_DEBUG_DYLIB=NO DEPLOYMENT_POSTPROCESSING=YES \
+     "OTHER_CODE_SIGN_FLAGS=--timestamp --keychain $HOME/Library/Keychains/login.keychain-db"
+   ```
+
+   `EASYDICT_RELEASE_PACKAGING=YES` 会跳过构建时的 SwiftFormat，避免改写源码；指定登录钥匙串是因为
+   同一张证书也在系统钥匙串里。
+2. 用 `xcrun notarytool submit --wait`（`--key`、`--key-id`、`--issuer`）公证 App 的 zip，再用
+   `xcrun stapler staple` 装订。
+3. 把 App 和指向 `/Applications` 的链接用 `hdiutil create -format UDZO` 打成 DMG，对 DMG 再签名、公证、装订。
+4. `gh release create <tag> <dmg> --repo enkin-japan/Easydict` 发布。
 
 如果“服务”菜单里没有出现 Easydict 的两项：
 - 系统设置 › 键盘 › 键盘快捷键 › 服务 › 文本，勾选它们（这里也可以绑定全局快捷键）；
