@@ -42,6 +42,9 @@
   登录钥匙串中已有的 EdDSA 私钥；Debug 关闭自动检查，避免被 Release 更新包替换。`appcast.xml` 换成 fork 自己的
   单条记录，build 号提升到 69。Release 增加 `-exportArchive` 步骤，使 Sparkle 内置的 `Autoupdate`、`Updater.app`
   与 XPC 服务也以 Developer ID 重签，公证后发布为 `v2.25.0-slim.3`（DMG 与 Sparkle 更新包 `Easydict.zip`）。
+- 本机：把 build 69 安装到 `/Applications/Easydict.app`；Debug 测试版 App、旧的 Release 归档与导出产物，以及
+  `dev.enkin.EasydictSlim-debug` 的偏好设置、缓存、WebKit、HTTPStorages 与 Application Support 数据移到废纸篓
+  （未清空）。本机原本没有安装其他 Easydict 版本，也没有官方版数据。
 
 ### 设计意图
 
@@ -67,6 +70,9 @@ ad-hoc，不受影响。
 - Sparkle 版（build 69）：Debug 构建通过并内嵌 `Sparkle.framework`；导出后全部 Mach-O 均为 Team `9A84P4ZS84`
   签名并带时间戳；App 与 DMG 公证均为 Accepted，`spctl` 为 `Notarized Developer ID`；`sign_update` 生成更新包签名，
   `xmllint` 校验 `appcast.xml`。
+- 发布后从公开地址取回 appcast 与 `Easydict.zip`：长度一致，`sign_update --verify` 签名有效，解压后的 App 签名与
+  公证票据有效；DMG 的 SHA-256 与本地一致。
+- 安装后启动 `/Applications/Easydict.app`：进程正常，日志无错误或崩溃记录，Sparkle 已完成首次检查。
 
 ### 受影响文件
 
