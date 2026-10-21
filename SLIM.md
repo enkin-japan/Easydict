@@ -9,7 +9,7 @@
 - AppleScript 浏览器取词与取网址（不再需要“自动化”权限，浏览器改走辅助功能）
 - 所有云端翻译与云端大模型服务：Gemini、Claude、DeepSeek、Groq、智谱、MiniMax、GitHub Models、豆包、阿里、火山、腾讯、彩云、小牛、内置 AI、润色/摘要、Claude Code、GitHub Copilot
 - 内置 API Key、HTTP 服务器（Vapor）
-- Sparkle 自动更新、Firebase 统计、Sentry 崩溃上报、隐私设置页
+- Firebase 统计、Sentry 崩溃上报、隐私设置页
 - 在线语种识别优化（Google/百度）、有道 OCR、有道/必应/谷歌在线发音
 
 **保留**
@@ -27,6 +27,7 @@
 - Bundle ID 改为 `dev.enkin.EasydictSlim`，不会与官方版冲突，也不会被官方更新覆盖。
 - Release 用自己的 Developer ID（Team `9A84P4ZS84`）签名并公证：签名身份固定，更新后不用重新授予辅助功能权限，
   其他 Mac 下载后也能直接打开。Debug 仍是本机 ad-hoc 签名。
+- Sparkle 自动更新改为读取本 fork 的 `appcast.xml`（`dev` 分支），菜单栏菜单和 App 菜单都有“检查更新”。
 
 以下服务的源码还留在工程里，但**没有注册、不会出现、不会联网**：有道、DeepL、Google、Bing、百度、OpenAI、Codex CLI。
 它们与语种识别、发音等模块耦合较深，等第一次编译通过后可以再逐个物理删除。
@@ -39,14 +40,14 @@
 open Easydict.xcworkspace        # 在仓库根目录执行，注意是 .xcworkspace
 ```
 
-1. 第一次打开时 Xcode 会重新解析 Swift Package（已删掉 Sparkle/Firebase/Sentry/Vapor），等它完成。
+1. 第一次打开时 Xcode 会重新解析 Swift Package（已删掉 Firebase/Sentry/Vapor），等它完成。
 2. Scheme 选 `Easydict`，`Product › Build`（⌘B）。
 3. 把编译出来的 `Easydict.app` 拖到 `/Applications`，启动一次。
 
-## 发布 DMG
+## 发布新版本
 
 需要钥匙串里的 `Developer ID Application` 证书，以及有公证权限的 App Store Connect API Key
-（`AuthKey_<KeyID>.p8` 与 Issuer ID）。
+（`AuthKey_<KeyID>.p8` 与 Issuer ID），以及登录钥匙串里的 Sparkle EdDSA 私钥。
 
 1. 归档通用版（arm64 + x86_64）：
 
@@ -59,10 +60,23 @@ open Easydict.xcworkspace        # 在仓库根目录执行，注意是 .xcworks
 
    `EASYDICT_RELEASE_PACKAGING=YES` 会跳过构建时的 SwiftFormat，避免改写源码；指定登录钥匙串是因为
    同一张证书也在系统钥匙串里。
-2. 用 `xcrun notarytool submit --wait`（`--key`、`--key-id`、`--issuer`）公证 App 的 zip，再用
+2. 用 `xcodebuild -exportArchive` 导出（导出选项：`method` 为 `developer-id`、`signingStyle` 为 `manual`、
+   `teamID` 为 `9A84P4ZS84`）。归档本身不会重签 Sparkle 内置的 `Autoupdate`、`Updater.app` 和 XPC 服务，
+   只有导出后它们才是 Developer ID 签名，否则公证不通过。
+3. 用 `xcrun notarytool submit --wait`（`--key`、`--key-id`、`--issuer`）公证导出 App 的 zip，再用
    `xcrun stapler staple` 装订。
-3. 把 App 和指向 `/Applications` 的链接用 `hdiutil create -format UDZO` 打成 DMG，对 DMG 再签名、公证、装订。
-4. `gh release create <tag> <dmg> --repo enkin-japan/Easydict` 发布。
+4. 把 App 和指向 `/Applications` 的链接用 `hdiutil create -format UDZO` 打成 DMG，对 DMG 再签名、公证、装订。
+5. 用装订后的 App 生成 Sparkle 更新包并签名（私钥在登录钥匙串，公钥写在 `Info.plist` 的 `SUPublicEDKey`）：
+
+   ```bash
+   ditto -c -k --sequesterRsrc --keepParent Easydict.app Easydict.zip
+   "$DERIVED_DATA/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update" Easydict.zip
+   ```
+
+6. `gh release create <tag> Easydict-Slim-<版本>.dmg Easydict.zip --repo enkin-japan/Easydict` 发布。
+7. 在 `appcast.xml` 最前面加一个 `<item>`：`sparkle:version` 是 build 号（`CURRENT_PROJECT_VERSION`，
+   每次发布必须递增），`enclosure` 指向该 Release 的 `Easydict.zip`，填上 `sign_update` 输出的
+   `sparkle:edSignature` 和 `length`；提交并推送到 `dev` 后，已安装的 App 就能检查到更新。
 
 如果“服务”菜单里没有出现 Easydict 的两项：
 - 系统设置 › 键盘 › 键盘快捷键 › 服务 › 文本，勾选它们（这里也可以绑定全局快捷键）；

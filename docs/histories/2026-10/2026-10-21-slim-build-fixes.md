@@ -1,8 +1,8 @@
-## 2026-10-21 | 任务：整合精简版、修复编译并发布 DMG
+## 2026-10-21 | 任务：整合精简版、修复编译、发布 DMG 并接入 Sparkle
 
 <!-- 文件名：YYYY-MM-DD-<slug>.md；命名规则见 docs/histories/README.md 的“命名与 slug”。 -->
 
-**Links:** [`SLIM.md`](../../../SLIM.md)、GitHub Release `v2.25.0-slim.1`（ad-hoc）与 `v2.25.0-slim.2`（Developer ID 公证）（enkin-japan/Easydict）
+**Links:** [`SLIM.md`](../../../SLIM.md)、GitHub Release `v2.25.0-slim.1`（ad-hoc）、`v2.25.0-slim.2`（Developer ID 公证）与 `v2.25.0-slim.3`（Sparkle）（enkin-japan/Easydict）
 
 ### 执行上下文
 
@@ -14,7 +14,8 @@
 
 评估个人精简版（只保留查词、翻译、读音，去掉 OCR 截图和云端服务，只用自定义 API / 本地模型）是否合理，
 并首次编译运行；随后把本地精简版整合进用户 fork，只保留最终版本，并发布 DMG 供多台设备下载安装；
-之后改用 Developer ID 签名并公证，避免每次更新都要重新授予权限。
+之后改用 Developer ID 签名并公证，避免每次更新都要重新授予权限；最后接入 Sparkle 自动更新，并把本机安装
+改为当前版本、清理残留版本。
 
 ### 变更
 
@@ -36,6 +37,11 @@
   恢复上游的 `CODE_SIGN_IDENTITY[sdk=macosx*] = "Developer ID Application"`，Team 改为 `9A84P4ZS84`；归档时
   传入 `--timestamp` 并指定登录钥匙串（同一证书也在系统钥匙串中）。App 与 DMG 用 App Store Connect API Key
   公证并装订，发布为 `v2.25.0-slim.2`；`SLIM.md` 补充发布步骤并修正打开 workspace 的路径。
+- Sparkle：按上游原实现恢复 Sparkle 2 依赖（解析为 2.10.0）、`SPUStandardUpdaterController`、菜单栏菜单与 App
+  菜单的“检查更新”；去掉上游的 beta 渠道。`SUFeedURL` 指向 fork `dev` 分支的 `appcast.xml`，`SUPublicEDKey` 取自
+  登录钥匙串中已有的 EdDSA 私钥；Debug 关闭自动检查，避免被 Release 更新包替换。`appcast.xml` 换成 fork 自己的
+  单条记录，build 号提升到 69。Release 增加 `-exportArchive` 步骤，使 Sparkle 内置的 `Autoupdate`、`Updater.app`
+  与 XPC 服务也以 Developer ID 重签，公证后发布为 `v2.25.0-slim.3`（DMG 与 Sparkle 更新包 `Easydict.zip`）。
 
 ### 设计意图
 
@@ -58,6 +64,9 @@ ad-hoc，不受影响。
   启用 Hardened Runtime。
 - `notarytool submit --wait`：App 与 DMG 公证结果均为 Accepted，App 日志无 issues；两者均已 `stapler staple`。
 - `spctl -a`：DMG 与其中的 App 均为 `accepted`，`source=Notarized Developer ID`。
+- Sparkle 版（build 69）：Debug 构建通过并内嵌 `Sparkle.framework`；导出后全部 Mach-O 均为 Team `9A84P4ZS84`
+  签名并带时间戳；App 与 DMG 公证均为 Accepted，`spctl` 为 `Notarized Developer ID`；`sign_update` 生成更新包签名，
+  `xmllint` 校验 `appcast.xml`。
 
 ### 受影响文件
 
@@ -66,6 +75,14 @@ ad-hoc，不受影响。
 - `Easydict/Swift/Utility/Extensions/String/String+EncryptAES.swift`
 - `Easydict/objc/ViewController/Window/BaseQueryWindow/EZBaseQueryViewController.m`
 - `Easydict.xcodeproj/project.pbxproj`
+- `Easydict.xcworkspace/xcshareddata/swiftpm/Package.resolved`
+- `Easydict/App/Info.plist`
+- `Easydict/App/Info-debug.plist`
+- `Easydict/Swift/Utility/GlobalContext.swift`
+- `Easydict/Swift/Feature/Configuration/MyConfiguration.swift`
+- `Easydict/Swift/View/MenuItemView.swift`
+- `Easydict/Swift/View/MenuView/MainMenuCommand.swift`
+- `appcast.xml`
 - `SLIM.md`
 
 ### 后续事项

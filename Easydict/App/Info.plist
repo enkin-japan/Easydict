@@ -104,5 +104,11 @@
 	<true/>
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/enkin-japan/Easydict/dev/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>rO8YyJT++AQ8w9YIhWVaY2YTlLvdSZIXCZrPeR1A2jI=</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
 </dict>
 </plist>

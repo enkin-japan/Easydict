@@ -9,6 +9,7 @@
 import Defaults
 import SettingsAccess
 import SFSafeSymbols
+import Sparkle
 import SwiftUI
 import ZipArchive
 
@@ -48,6 +49,7 @@ struct MenuItemView: View {
             Divider()
 
             settingItem.keyboardShortcut(.init(","))
+            checkUpdateItem
             helpItem
 
             Divider()
@@ -63,6 +65,8 @@ struct MenuItemView: View {
     }
 
     // MARK: Private
+
+    @ObservedObject private var store = MenuItemStore()
 
     @State private var currentVersion =
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
@@ -131,6 +135,16 @@ struct MenuItemView: View {
                 )
             }
         }
+    }
+
+    /// Check Updates item
+    @ViewBuilder private var checkUpdateItem: some View {
+        Button("check_updates") {
+            logInfo("Check Updates")
+            NSApp.activateApp()
+            MyConfiguration.shared.updater.checkForUpdates()
+        }
+        .disabled(!store.canCheckForUpdates)
     }
 
     /// Quit item
@@ -239,6 +253,22 @@ private struct MenuItemBuilder: View {
             }
         }
     }
+}
+
+// MARK: - MenuItemStore
+
+final class MenuItemStore: ObservableObject {
+    // MARK: Lifecycle
+
+    init() {
+        MyConfiguration.shared.updater
+            .publisher(for: \.canCheckForUpdates)
+            .assign(to: &$canCheckForUpdates)
+    }
+
+    // MARK: Internal
+
+    @Published var canCheckForUpdates = false
 }
 
 #Preview {

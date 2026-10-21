@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		03A8308D2B405F8E00112834 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 03A8308C2B405F8E00112834 /* Sparkle */; };
 		D71101351011000000000003 /* EZQueryTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = D71101351011000000000002 /* EZQueryTableView.m */; };
 		02DEDC04202604300000007E /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DEDC042026043000000002 /* MarkdownRenderer.swift */; };
 		02DEDC04202604300000008E /* MarkdownLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DEDC042026043000000003 /* MarkdownLabel.swift */; };
@@ -1327,6 +1328,7 @@
 				C4BE8E1C2C72E61B00F53204 /* LaunchAtLogin in Frameworks */,
 				03022F222B36D1A400B63209 /* SnapKit in Frameworks */,
 				0322D74C2EDC1C72005E67D8 /* OmenTextField in Frameworks */,
+				03A8308D2B405F8E00112834 /* Sparkle in Frameworks */,
 				0364EC8A2C208EB50036B61B /* KeySender in Frameworks */,
 				B87AC7E36367075BA5D13234 /* Pods_Easydict.framework in Frameworks */,
 				03779F1A2BB25797008D3C42 /* OpenAI in Frameworks */,
@@ -3634,6 +3636,7 @@
 				03FD68BA2B1DC59600FD388E /* CryptoSwift */,
 				03022F1B2B35DEBA00B63209 /* Hue */,
 				03022F212B36D1A400B63209 /* SnapKit */,
+				03A8308C2B405F8E00112834 /* Sparkle */,
 				038030942B4106800009230C /* CocoaLumberjack */,
 				038030962B4106800009230C /* CocoaLumberjackSwift */,
 				038EA1A92B41169C008A6DD1 /* ZipArchive */,
@@ -3694,6 +3697,7 @@
 				03FD68B92B1DC59600FD388E /* XCRemoteSwiftPackageReference "CryptoSwift" */,
 				03022F1A2B35DEBA00B63209 /* XCRemoteSwiftPackageReference "Hue" */,
 				03022F202B36D1A300B63209 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				03A8308B2B405F8E00112834 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				038030932B4106800009230C /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
 				038EA1A82B41169C008A6DD1 /* XCRemoteSwiftPackageReference "ZipArchive" */,
 				038EA1AB2B41282F008A6DD1 /* XCRemoteSwiftPackageReference "MJExtension" */,
@@ -4664,7 +4668,7 @@
 		"CODE_SIGN_STYLE" = "$CODE_SIGN_STYLE";
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 68;
+		"CURRENT_PROJECT_VERSION" = 69;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = dwarf;
 		"DEVELOPMENT_TEAM" = "$(DEVELOPMENT_TEAM)";
@@ -4712,7 +4716,7 @@
 		"CODE_SIGN_STYLE" = Manual;
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 68;
+		"CURRENT_PROJECT_VERSION" = 69;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 		"DEVELOPMENT_TEAM" = "";
@@ -4932,6 +4936,14 @@
 				minimumVersion = 8.2.0;
 			};
 		};
+		03A8308B2B405F8E00112834 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -5029,6 +5041,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EA3B81FA2B52555C004C0E8B /* XCRemoteSwiftPackageReference "Defaults" */;
 			productName = Defaults;
+		};
+		03A8308C2B405F8E00112834 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 03A8308B2B405F8E00112834 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

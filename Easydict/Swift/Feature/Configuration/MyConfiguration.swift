@@ -123,6 +123,7 @@ class MyConfiguration: NSObject {
     @ShortcutWrapper(.appleDictionaryShortcut) var appleDictShortcutString: String
     @ShortcutWrapper(.eudicShortcut) var eudicDictShortcutString: String
 
+    let updater = GlobalContext.shared.updaterController.updater
     let fontSizes: [CGFloat] = [1, 1.1, 1.2, 1.3, 1.4]
     var disabledAutoSelect: Bool = false
     var isRecordingSelectTextShortcutKey: Bool = false
