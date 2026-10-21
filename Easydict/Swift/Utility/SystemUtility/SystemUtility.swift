@@ -126,9 +126,8 @@ class SystemUtility: NSObject {
         let isSupportedAX = elementInfo.isSupportedAXElement
         let enableCompatibilityMode = Defaults[.enableCompatibilityReplace]
 
-        let isBrowser = AppleScriptTask.isBrowserSupportingAppleScript(frontmostAppBundleID)
-        let preferAppleScriptAPI = Defaults[.preferAppleScriptAPI]
-        let shouldUseAppleScript = isBrowser && preferAppleScriptAPI
+        // Slim build: never drive browsers via AppleScript (avoids the Automation permission).
+        let shouldUseAppleScript = false
 
         return textStrategies(
             shouldUseAppleScript: shouldUseAppleScript,

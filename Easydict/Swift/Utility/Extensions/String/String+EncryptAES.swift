@@ -6,14 +6,15 @@
 //  Copyright © 2023 izual. All rights reserved.
 //
 
+import CryptoKit
 import CryptoSwift
 import Foundation
 
 extension String {
-    private var aes: AES {
+    private var aes: CryptoSwift.AES {
         let bundleName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
         let key = String(bundleName.sha256().prefix(16))
-        let aes = try! AES(key: key, iv: key) // aes128
+        let aes = try! CryptoSwift.AES(key: key, iv: key) // aes128
         return aes
     }
 
@@ -49,7 +50,8 @@ extension NSString {
         guard let str = self as String? else { return "" }
 
         do {
-            let aes = try AES(key: Array(keyData), blockMode: CBC(iv: Array(ivData)), padding: .pkcs7) // aes128
+            let aes = try CryptoSwift
+                .AES(key: Array(keyData), blockMode: CBC(iv: Array(ivData)), padding: .pkcs7) // aes128
             let ciphertext = try aes.encrypt(Array(str.utf8))
             let encryptedString = ciphertext.toBase64()
             return encryptedString as NSString
@@ -63,7 +65,8 @@ extension NSString {
         guard let str = self as String? else { return "" }
 
         do {
-            let aes = try AES(key: Array(keyData), blockMode: CBC(iv: Array(ivData)), padding: .pkcs7) // aes128
+            let aes = try CryptoSwift
+                .AES(key: Array(keyData), blockMode: CBC(iv: Array(ivData)), padding: .pkcs7) // aes128
             let ciphertext = try aes.decrypt(Array(base64: str))
             let decryptedString = String(bytes: ciphertext, encoding: .utf8)!
             return decryptedString as NSString
@@ -71,5 +74,13 @@ extension NSString {
             logError("decryptAES error: \(error)")
             return ""
         }
+    }
+}
+
+extension String {
+    /// Hex SHA-256 digest (moved here from the removed Tencent service; used for the AES key).
+    func sha256() -> String {
+        let digest = CryptoKit.SHA256.hash(data: Data(utf8))
+        return digest.compactMap { String(format: "%02x", $0) }.joined()
     }
 }

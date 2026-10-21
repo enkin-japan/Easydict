@@ -490,9 +490,6 @@ static EZWindowManager *_instance;
     
     [self saveFrontmostApplication];
 
-    if (Screenshot.shared.isTakingScreenshot) {
-        return;
-    }
 
     [[self currentShowingSettingsWindow] close];
 
@@ -795,9 +792,6 @@ static EZWindowManager *_instance;
     }
 
     [self saveFrontmostApplication];
-    if (Screenshot.shared.isTakingScreenshot) {
-        return;
-    }
 
     EZWindowType windowType = MyConfiguration.shared.shortcutSelectTranslateWindowType;
     MMLogInfo(@"selectTextTranslate windowType: %@", @(windowType));
@@ -817,9 +811,6 @@ static EZWindowManager *_instance;
     MMLogInfo(@"inputTranslate");
 
     [self saveFrontmostApplication];
-    if (Screenshot.shared.isTakingScreenshot) {
-        return;
-    }
 
     EZWindowType windowType = MyConfiguration.shared.shortcutSelectTranslateWindowType;
 
@@ -852,51 +843,6 @@ static EZWindowManager *_instance;
     [self showFloatingWindowType:windowType queryText:nil];
 }
 
-- (void)snipTranslate {
-    MMLogInfo(@"snipTranslate");
-
-    // Close non-main floating window if not pinned. Fix https://github.com/tisfeng/Easydict/issues/126
-    [self closeFloatingWindowIfNotPinnedOrMain];
-
-    [self captureWithRestorePreviousApp:NO completion:^(NSImage *_Nullable image) {
-        BOOL autoQuery = [MyConfiguration.shared autoQueryOCRText];
-        [self showFloatingWindowWithOCRImage:image autoQuery:autoQuery actionType:EZActionTypeOCRQuery];
-    }];
-}
-
-/// Silent screenshot and OCR, without showing floating window.
-- (void)silentScreenshotOCR {
-    MMLogInfo(@"Silent screenshot and OCR");
-
-    [self captureWithRestorePreviousApp:YES completion:^(NSImage *_Nullable image) {
-        if (!image) {
-            return;
-        }
-
-        self.actionType = EZActionTypeScreenshotOCR;
-        EZBaseQueryViewController *viewController = self.backgroundQueryViewController;
-        [viewController resetQueryModelForBackgroundOCR];
-        [viewController startOCRImage:image actionType:self.actionType autoQuery:NO];
-    }];
-}
-
-- (void)screenshotOCR {
-    MMLogInfo(@"Screenshot OCR");
-
-    [self captureWithRestorePreviousApp:YES completion:^(NSImage *_Nullable image) {
-        if (!image) {
-            MMLogWarn(@"Screenshot OCR skipped: captured image is nil");
-            return;
-        }
-        AppleOCREngine *appleOCREngine = [AppleOCREngine new];
-        [appleOCREngine showOCRWindowWithImage:image language:EZLanguageAuto completionHandler:^(NSError *error) {
-            if (error) {
-                MMLogError(@"OCR Preview failed: %@", error.localizedDescription);
-            }
-        }];
-    }];
-}
-
 /// Translate text from pasteboard, support both image and text.
 - (void)pasteboardTranslate:(EZWindowType)windowType {
     MMLogInfo(@"Pasteboard Translate with windowType: %@", @(windowType));
@@ -919,50 +865,9 @@ static EZWindowManager *_instance;
     }
 }
 
-/**
- * Capture screenshot with options for app restoration
- * @param restorePreviousApp Whether to restore the previous application after capture
- * @param imageHandler Block to handle the captured image
- */
-- (void)captureWithRestorePreviousApp:(BOOL)restorePreviousApp
-                           completion:(void (^)(NSImage *_Nullable image))imageHandler {
-    MMLogInfo(@"Starting capture");
-
-    [self saveFrontmostApplication];
-
-    if (Screenshot.shared.isTakingScreenshot) {
-        MMLogWarn(@"Already snapshotting, ignoring request");
-        return;
-    }
-
-    // Set whether to restore previous app
-    Screenshot.shared.shouldRestorePreviousApp = restorePreviousApp;
-
-    void (^captureCompletion)(NSImage *_Nullable) = ^(NSImage *_Nullable image) {
-        if (!image) {
-            MMLogWarn(@"Failed to capture screenshot");
-            if (imageHandler) {
-                imageHandler(nil);
-            }
-            return;
-        }
-
-        MMLogInfo(@"Screenshot captured: %@", image);
-
-        if (imageHandler) {
-            imageHandler(image);
-        }
-    };
-
-    [Screenshot.shared startCaptureWithCompletion:captureCompletion];
-}
-
 #pragma mark - Application Shortcut
 
 - (void)rerty {
-    if (Screenshot.shared.isTakingScreenshot) {
-        return;
-    }
 
     if ([[NSApplication sharedApplication] keyWindow] == self.floatingWindow) {
         [self.floatingWindow.queryViewController retryQueryWithLanguage:EZLanguageAuto];
@@ -999,11 +904,7 @@ static EZWindowManager *_instance;
 - (void)closeWindowOrExitSreenshot {
     MMLogInfo(@"Close window, or exit screenshot");
 
-    if (Screenshot.shared.isTakingScreenshot) {
-        [Screenshot.shared finishCapture:nil];
-    } else {
-        [self closeFloatingWindow];
-    }
+    [self closeFloatingWindow];
 }
 
 - (void)toggleTranslationLanguages {

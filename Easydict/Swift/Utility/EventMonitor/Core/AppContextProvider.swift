@@ -43,20 +43,10 @@ final class AppContextProvider {
         return type
     }
 
+    /// Slim build: the browser tab URL used to be read via AppleScript, which triggers
+    /// the Automation permission prompt. It is no longer collected.
     func recordSelectTextInfo(updateURL: @escaping (String?) -> ()) {
-        let frontmostApp = frontmostApplication
-        let bundleID = frontmostApp?.bundleIdentifier ?? ""
-        Task {
-            do {
-                let urlString = try await AppleScriptTask.getCurrentTabURLFromBrowser(bundleID)
-                logInfo("Get browser tab url: \(String(describing: urlString))")
-                await MainActor.run {
-                    updateURL(urlString)
-                }
-            } catch {
-                logError("Failed to get browser tab url: \(error)")
-            }
-        }
+        updateURL(nil)
     }
 
     func useAccessibilityForFirstTime() -> Bool {

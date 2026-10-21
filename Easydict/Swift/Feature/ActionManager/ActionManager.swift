@@ -22,9 +22,6 @@ class ActionManager: NSObject {
 
     @objc static let shared = ActionManager()
 
-    var translateService = BuiltInAIService()
-    var polishService = PolishingService()
-
     // MARK: - Text Field Detection and Access
 
     // MARK: - Public Methods
@@ -35,10 +32,21 @@ class ActionManager: NSObject {
         await executeTextReplacementAction(.translate)
     }
 
-    /// Polish selected text and replace it with the polished result
-    func polishAndReplace() async {
-        logInfo("Polish and Replace")
-        await executeTextReplacementAction(.polish)
+    /// Translates `text` with the first enabled local / self-hosted AI service and returns the full result.
+    /// Used by the macOS Services menu ("Translate and Replace"), which needs the text synchronously.
+    func translatedText(for text: String) async throws -> String {
+        guard let request = await prepareTranslationRequest(queryText: text, type: .translate),
+              let service = QueryServiceFactory.shared.service(withTypeId: request.serviceType)
+              as? StreamService
+        else {
+            throw QueryError(type: .api, message: "No enabled AI service (Ollama / Custom OpenAI)")
+        }
+
+        var result = ""
+        for try await chunk in try await service.contentStreamTranslate(request: request) {
+            result += chunk
+        }
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: Private
@@ -46,10 +54,21 @@ class ActionManager: NSObject {
     /// Type of text processing action
     private enum ProcessingType {
         case translate
-        case polish
     }
 
     private let systemUtility = SystemUtility.shared
+
+    /// First enabled `StreamService` across the query windows (fixed → mini → main).
+    private static func firstEnabledStreamService() -> StreamService? {
+        let windowTypes: [EZWindowType] = [.fixed, .mini, .main]
+        for windowType in windowTypes {
+            let services = LocalStorage.shared().enabledServices(windowType)
+            if let service = services.first(where: { $0 is StreamService }) as? StreamService {
+                return service
+            }
+        }
+        return nil
+    }
 
     // MARK: - Core Action Methods
 
@@ -108,13 +127,13 @@ class ActionManager: NSObject {
             queryType: .translation
         )
 
-        // Set service type based on processing type
-        switch type {
-        case .translate:
-            request.serviceType = translateService.serviceType().rawValue
-        case .polish:
-            request.serviceType = polishService.serviceType().rawValue
+        // Slim build: use the first enabled local / self-hosted AI service
+        // (Ollama or Custom OpenAI) configured by the user.
+        guard let service = Self.firstEnabledStreamService() else {
+            logError("No enabled AI service (Ollama / Custom OpenAI) for \(type), skipping")
+            return nil
         }
+        request.serviceType = service.serviceTypeWithUniqueIdentifier()
 
         return request
     }

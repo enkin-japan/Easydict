@@ -99,11 +99,12 @@ extension AnkiConnectSettingsView {
     }
 
     private var previewServiceTypes: [ServiceType] {
+        // Slim build: only offline dictionaries are available.
         if Defaults[.mdictDictionaries].contains(where: \.enabled) {
-            return [.youdao, .appleDictionary, .mDict, .google]
+            return [.appleDictionary, .mDict]
         }
 
-        return [.youdao, .appleDictionary, .google]
+        return [.appleDictionary]
     }
 
     private var endpointRow: some View {

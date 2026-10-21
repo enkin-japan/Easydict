@@ -20,12 +20,11 @@ extension ShortcutManager {
 
     private func setDefaultGlobalShortcutKeys() {
         Defaults[.inputShortcut] = KeyCombo(key: .a, cocoaModifiers: .option)
-        Defaults[.snipShortcut] = KeyCombo(key: .s, cocoaModifiers: .option)
+        // Slim build: no built-in screenshot. ⌥S translates the clipboard instead
+        // (text, or an image copied from your own screenshot tool → OCR + translate).
+        Defaults[.pasteboardTranslateShortcut] = KeyCombo(key: .s, cocoaModifiers: .option)
         Defaults[.selectionShortcut] = KeyCombo(key: .d, cocoaModifiers: .option)
         Defaults[.showMiniWindowShortcut] = KeyCombo(key: .f, cocoaModifiers: .option)
-        Defaults[.silentScreenshotOCRShortcut] = KeyCombo(
-            key: .s, cocoaModifiers: [.option, .shift]
-        )
     }
 
     private func setDefaultAppShortcutKeys() {

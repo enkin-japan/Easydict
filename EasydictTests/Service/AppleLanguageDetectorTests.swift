@@ -446,9 +446,7 @@ struct AppleLanguageDetectorTests {
         #expect(GoogleService().language(fromCode: "ca") == .catalan)
         #expect(BingService().languageCode(forLanguage: .catalan) == "ca")
         #expect(BaiduService().languageCode(forLanguage: .catalan) == "cat")
-        #expect(AliTranslateType.supportLanguagesDictionary[.catalan] == "ca")
         #expect(DeepLService().languageCode(for: .catalan) == "ca")
-        #expect(NiuTransService().languageCode(forLanguage: .catalan) == "ca")
     }
 
     @Test("Brazilian Portuguese Language Code Mapping", .tags(.apple, .unit))

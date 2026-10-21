@@ -286,9 +286,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     self.serviceTypeIds = serviceTypeIds;
 
     self.audioPlayer = [[EZAudioPlayer alloc] init];
-    if (!self.youdaoService) {
-        self.youdaoService = [EZLocalStorage.shared service:EZServiceTypeYoudao windowType:self.windowType];
-    }
 }
 
 - (void)dealloc {
@@ -1580,7 +1577,8 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
         } else if (needUpdateIframe) {
             [webViewManager updateAllIframe];
         }
-    } else if ([service.serviceType isEqualToString:EZServiceTypeMDict]) {
+    } else if ([service.serviceType isEqualToString:EZServiceTypeMDict] ||
+               [service.serviceType isEqualToString:EZServiceTypeReading]) {
         EZWebViewManager *webViewManager = result.webViewManager;
         BOOL shouldRenderHTML = EZResultShouldRenderDictionaryHTML(result);
         BOOL htmlChanged = ![webViewManager.loadedHTMLString isEqualToString:result.htmlString];

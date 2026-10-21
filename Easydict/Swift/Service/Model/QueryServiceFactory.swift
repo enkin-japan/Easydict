@@ -111,37 +111,21 @@ final class QueryServiceFactory: NSObject {
 
     // MARK: Private
 
+    /// Slim build: only local / self-hosted services are registered.
+    /// Other service classes stay in the project (some are shared infrastructure,
+    /// e.g. `AppleService` handles language detection and system TTS) but are not offered.
     private let serviceRegistrations: [ServiceRegistration] = [
         .init(.appleDictionary, AppleDictionary.self, "apple_dictionary", apiKeyRequirement: .none),
         .init(.mDict, MDictService.self, "service.mdict.name", apiKeyRequirement: .none),
-        .init(.youdao, YoudaoService.self, "youdao_dict", apiKeyRequirement: .none),
-        .init(.openAI, OpenAIService.self, "openai_translate"),
-        .init(.deepSeek, DeepSeekService.self, "deepseek_translate"),
-        .init(.groq, GroqService.self, "groq_translate"),
-        .init(.zhipu, ZhipuService.self, "zhipu_translate"),
-        .init(.miniMax, MiniMaxService.self, "minimax_translate"),
-        .init(.gitHub, GitHubService.self, "github_models"),
-        .init(.builtInAI, BuiltInAIService.self, "built_in_ai", apiKeyRequirement: .builtIn),
-        .init(.claudeCode, ClaudeCodeService.self, "service.claude_code.name", apiKeyRequirement: .agentCLI),
-        .init(.codexCLI, CodexCLIService.self, "service.codex_cli.name", apiKeyRequirement: .agentCLI),
-        .init(.gitHubCopilot, GitHubCopilotService.self, "service.github_copilot.name", apiKeyRequirement: .agentCLI),
-        .init(.gemini, GeminiService.self, "gemini_translate"),
-        .init(.claude, ClaudeService.self, "claude_translate"),
+        .init(.reading, ReadingService.self, "service.reading.name", apiKeyRequirement: .none),
         .init(.ollama, OllamaService.self, "ollama_translate", apiKeyRequirement: .none),
-        .init(.polishing, PolishingService.self, "polishing_service", apiKeyRequirement: .builtIn),
-        .init(.summary, SummaryService.self, "summary_service", apiKeyRequirement: .builtIn),
         .init(.customOpenAI, CustomOpenAIService.self, "custom_openai", allowsMultipleInstances: true),
-        .init(.deepL, DeepLService.self, "deepL_translate", apiKeyRequirement: .none),
-        .init(.google, GoogleService.self, "google_translate", apiKeyRequirement: .none),
+    ]
+
+    /// Services that can be instantiated by type id (e.g. system TTS via `AppleService`)
+    /// but are never offered as query services in the service list.
+    private let infrastructureRegistrations: [ServiceRegistration] = [
         .init(.apple, AppleService.self, "apple_translate", apiKeyRequirement: .none),
-        .init(.baidu, BaiduService.self, "baidu_translate"),
-        .init(.bing, BingService.self, "bing_translate", apiKeyRequirement: .none),
-        .init(.volcano, VolcanoService.self, "volcano_translate"),
-        .init(.niuTrans, NiuTransService.self, "niuTrans_translate", apiKeyRequirement: .builtIn),
-        .init(.caiyun, CaiyunService.self, "caiyun_translate", apiKeyRequirement: .builtIn),
-        .init(.tencent, TencentService.self, "tencent_translate"),
-        .init(.alibaba, AliService.self, "ali_translate"),
-        .init(.doubao, DoubaoService.self, "doubao_translate"),
     ]
 
     private func serviceClass(withTypeId typeIdIfHave: String) -> QueryService.Type? {
@@ -151,6 +135,7 @@ final class QueryServiceFactory: NSObject {
     private func serviceRegistration(withTypeId typeIdIfHave: String) -> ServiceRegistration? {
         let components = serviceIdentifierComponents(from: typeIdIfHave)
         return serviceRegistrations.first { $0.serviceType.rawValue == components.rawType }
+            ?? infrastructureRegistrations.first { $0.serviceType.rawValue == components.rawType }
     }
 
     private func serviceIdentifierComponents(from typeIdIfHave: String)

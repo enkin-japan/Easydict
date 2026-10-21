@@ -9,7 +9,6 @@
 import Defaults
 import SettingsAccess
 import SFSafeSymbols
-import Sparkle
 import SwiftUI
 import ZipArchive
 
@@ -37,11 +36,7 @@ struct MenuItemView: View {
 
             Divider()
 
-            screenshotItem.keyboardShortcut(.snipTranslate)
-            silentScreenshotOCRItem.keyboardShortcut(.silentScreenshotOCR)
-
             if showOCRMenuItems {
-                screenshotOCRItem
                 pasteboardOCRItem
                 showOCRWindowItem
             }
@@ -49,20 +44,15 @@ struct MenuItemView: View {
             Divider()
 
             translateAndReplaceItem.keyboardShortcut(.translateAndReplace)
-            polishAndReplaceItem.keyboardShortcut(.polishAndReplace)
 
             Divider()
 
             settingItem.keyboardShortcut(.init(","))
-            checkUpdateItem
             helpItem
 
             Divider()
 
             quitItem.keyboardShortcut(.init("q"))
-        }
-        .task(id: includeBetaUpdates) {
-            latestVersion = await GitHubReleaseFetcher.latestVersion(includePrerelease: includeBetaUpdates)
         }
     }
 
@@ -74,31 +64,17 @@ struct MenuItemView: View {
 
     // MARK: Private
 
-    @ObservedObject private var store = MenuItemStore()
-
     @State private var currentVersion =
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
-
-    @State private var latestVersion: String?
 
     @Environment(\.openURL) private var openURL
 
     @Default(.showOCRMenuItems) private var showOCRMenuItems
     @Default(.mouseSelectTranslateWindowType) private var mouseSelectTranslateWindowType
     @Default(.shortcutSelectTranslateWindowType) private var shortcutSelectTranslateWindowType
-    @Default(.includeBetaUpdates) private var includeBetaUpdates
 
     private var versionString: String {
-        let defaultLabel = "Easydict  \(currentVersion)"
-        if let latestVersion, GitHubReleaseFetcher.isNewer(latestVersion, than: currentVersion) {
-            return defaultLabel + "  (✨\(latestVersion) )"
-        } else {
-            return defaultLabel
-        }
-    }
-
-    @ViewBuilder private var screenshotItem: some View {
-        menuItem(for: .snipTranslate)
+        "Easydict Slim  \(currentVersion)"
     }
 
     @ViewBuilder private var selectWordItem: some View {
@@ -109,24 +85,12 @@ struct MenuItemView: View {
         menuItem(for: .pasteboardTranslate)
     }
 
-    @ViewBuilder private var polishAndReplaceItem: some View {
-        menuItem(for: .polishAndReplace)
-    }
-
     @ViewBuilder private var translateAndReplaceItem: some View {
         menuItem(for: .translateAndReplace)
     }
 
     @ViewBuilder private var miniWindowItem: some View {
         menuItem(for: .showMiniWindow)
-    }
-
-    @ViewBuilder private var silentScreenshotOCRItem: some View {
-        menuItem(for: .silentScreenshotOCR)
-    }
-
-    @ViewBuilder private var screenshotOCRItem: some View {
-        menuItem(for: .screenshotOCR)
     }
 
     @ViewBuilder private var pasteboardOCRItem: some View {
@@ -141,9 +105,7 @@ struct MenuItemView: View {
 
     /// Version item
     @ViewBuilder private var versionItem: some View {
-        Button(versionString) {
-            openURL(AppConstants.releasesURL)
-        }
+        Text(versionString)
     }
 
     /// Settings item
@@ -169,16 +131,6 @@ struct MenuItemView: View {
                 )
             }
         }
-    }
-
-    /// Check Updates item
-    @ViewBuilder private var checkUpdateItem: some View {
-        Button("check_updates") {
-            logInfo("Check Updates")
-            NSApp.activateApp()
-            MyConfiguration.shared.updater.checkForUpdates()
-        }
-        .disabled(!store.canCheckForUpdates)
     }
 
     /// Quit item
@@ -287,22 +239,6 @@ private struct MenuItemBuilder: View {
             }
         }
     }
-}
-
-// MARK: - MenuItemStore
-
-final class MenuItemStore: ObservableObject {
-    // MARK: Lifecycle
-
-    init() {
-        MyConfiguration.shared.updater
-            .publisher(for: \.canCheckForUpdates)
-            .assign(to: &$canCheckForUpdates)
-    }
-
-    // MARK: Internal
-
-    @Published var canCheckForUpdates = false
 }
 
 #Preview {

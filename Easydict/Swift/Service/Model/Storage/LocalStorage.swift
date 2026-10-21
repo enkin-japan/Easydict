@@ -417,9 +417,9 @@ final class LocalStorage: NSObject {
     private let decoder = JSONDecoder()
 
     private let defaultServiceTypeIDs: [String] = [
-        ServiceType.youdao.rawValue,
-        ServiceType.deepL.rawValue,
-        ServiceType.builtInAI.rawValue,
+        ServiceType.reading.rawValue,
+        ServiceType.appleDictionary.rawValue,
+        ServiceType.ollama.rawValue,
     ]
 
     /// Raw dictionary backing service query statistics.

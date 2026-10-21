@@ -7,13 +7,12 @@
 //
 
 import Foundation
-import Vapor
 
 // MARK: - QueryError
 
 @objc(EZQueryError)
 @objcMembers
-public class QueryError: NSError, LocalizedError, AbortError, @unchecked Sendable {
+public class QueryError: NSError, LocalizedError, @unchecked Sendable {
     // MARK: Lifecycle
 
     public init(
@@ -177,17 +176,5 @@ public class QueryError: NSError, LocalizedError, AbortError, @unchecked Sendabl
 
     public static func queryError(from error: Error?) -> QueryError? {
         queryError(from: error, type: .api)
-    }
-}
-
-// MARK: - Vapor AbortError
-
-extension QueryError {
-    public var status: HTTPResponseStatus {
-        .badRequest
-    }
-
-    public var reason: String {
-        errorDescription ?? ""
     }
 }

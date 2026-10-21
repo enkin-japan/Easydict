@@ -6,11 +6,11 @@
 //  Copyright © 2024 izual. All rights reserved.
 //
 
-import Vapor
+import Foundation
 
 // MARK: - TranslationRequest
 
-struct TranslationRequest: Content {
+struct TranslationRequest: Codable {
     // MARK: Lifecycle
 
     // Custom initializer for default values
@@ -74,7 +74,7 @@ struct TranslationRequest: Content {
 
 // MARK: - TranslationResponse
 
-struct TranslationResponse: Content {
+struct TranslationResponse: Codable {
     var translatedText: String
     var sourceLanguage: String
     var HTMLStrings: [String]?
@@ -83,33 +83,33 @@ struct TranslationResponse: Content {
 
 // MARK: - OCRRequest
 
-struct OCRRequest: Content {
+struct OCRRequest: Codable {
     var imageData: Data
     var sourceLanguage: String?
 }
 
 // MARK: - OCRResponse
 
-struct OCRResponse: Content {
+struct OCRResponse: Codable {
     var ocrText: String
     var sourceLanguage: String
 }
 
 // MARK: - DetectRequest
 
-struct DetectRequest: Content {
+struct DetectRequest: Codable {
     var text: String
 }
 
 // MARK: - DetectResponse
 
-struct DetectResponse: Content {
+struct DetectResponse: Codable {
     var sourceLanguage: String // BCP-47 language code
 }
 
 // MARK: - GetSelectedTextResponse
 
-struct GetSelectedTextResponse: Content {
+struct GetSelectedTextResponse: Codable {
     var selectedText: String?
 }
 

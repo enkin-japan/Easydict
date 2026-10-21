@@ -115,7 +115,8 @@ public final class DetectManager: NSObject {
 
             let isPreferredLanguage = preferredLanguages.contains(appleDetectedLanguage)
 
-            let languageDetectOptimize = MyConfiguration.shared.languageDetectOptimize
+            // Slim build: language detection is always local (Apple NaturalLanguage), never online.
+            let languageDetectOptimize = LanguageDetectOptimize.none
 
             // If the detected language is preferred or optimization is disabled, use Apple's result.
             if isPreferredLanguage || languageDetectOptimize == .none {
@@ -337,23 +338,8 @@ public final class DetectManager: NSObject {
          it will always work in other languages.
          */
 
-        guard MyConfiguration.shared.enableYoudaoOCR else {
-            completion(ocrResult, error)
-            return
-        }
-
-        Task {
-            do {
-                let result = try await youdaoService.ocr(queryModel)
-                await MainActor.run {
-                    completion(result, nil)
-                }
-            } catch {
-                await MainActor.run {
-                    completion(ocrResult, error)
-                }
-            }
-        }
+        // Slim build: never fall back to online Youdao OCR.
+        completion(ocrResult, error)
     }
 
     /// Detects language using Baidu's service as a fallback.

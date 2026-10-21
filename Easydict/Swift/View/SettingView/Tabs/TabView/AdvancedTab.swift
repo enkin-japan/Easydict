@@ -36,27 +36,7 @@ struct AdvancedTab: View {
 
             // General settings section
             Section {
-                Picker(
-                    selection: $defaultTTSServiceType,
-                    label: AdvancedTabItemView(
-                        color: .blue,
-                        icon: .ellipsisBubbleFill,
-                        labelText: "setting.advance.default_tts_service"
-                    )
-                ) {
-                    ForEach(TTSServiceType.allCases, id: \.rawValue) { option in
-                        Text(option.localizedStringResource)
-                            .tag(option)
-                    }
-                }
-                Toggle(isOn: $preferYoudaoTTSForEnglishWord) {
-                    AdvancedTabItemView(
-                        color: .indigo,
-                        icon: .waveform,
-                        labelText: "setting.advance.prefer_youdao_tts_for_english_word",
-                        subtitleText: "setting.advance.prefer_youdao_tts_for_english_word_desc"
-                    )
-                }
+                // Slim build: TTS is fixed to the offline system voice.
                 LabeledContent {
                     TextField(
                         text: $minClassicalChineseTextDetectLength,
@@ -172,14 +152,6 @@ struct AdvancedTab: View {
                     }
                 }
 
-                Toggle(isOn: $preferAppleScriptAPI) {
-                    AdvancedTabItemView(
-                        color: .orange,
-                        icon: .applescript,
-                        labelText: "setting.advance.prefer_applescript_api",
-                        subtitleText: "setting.advance.prefer_applescript_api_desc"
-                    )
-                }
                 Toggle(isOn: $enableCompatibilityReplace) {
                     AdvancedTabItemView(
                         color: .purple,
@@ -245,14 +217,6 @@ struct AdvancedTab: View {
 
             // OCR settings section
             Section {
-                Toggle(isOn: $enableYoudaoOCR) {
-                    AdvancedTabItemView(
-                        color: .blue,
-                        icon: .circleRectangleFilledPatternDiagonalline,
-                        labelText: "setting.advance.enable_youdao_ocr",
-                        subtitleText: "setting.advance.enable_youdao_ocr_desc"
-                    )
-                }
                 Toggle(isOn: $enableOCRTextNormalization) {
                     AdvancedTabItemView(
                         color: .green,
@@ -271,14 +235,6 @@ struct AdvancedTab: View {
                     )
                 }
 
-                Toggle(isOn: $isScreenshotTipLayerHidden) {
-                    AdvancedTabItemView(
-                        color: .purple,
-                        icon: .lightbulbFill,
-                        labelText: "setting.advance.hide_screenshot_tip_layer",
-                        subtitleText: "setting.advance.hide_screenshot_tip_layer_desc"
-                    )
-                }
             } header: {
                 Text("setting.advance.header.ocr_settings")
             }
@@ -381,38 +337,6 @@ struct AdvancedTab: View {
                 Text("setting.advance.window_management.header")
             }
 
-            // HTTP server
-            Section {
-                Toggle(isOn: $enableHTTPServer) {
-                    AdvancedTabItemView(
-                        color: getHttpIconColor(),
-                        icon: .network,
-                        labelText: "setting.advance.enable_http_server"
-                    )
-                }
-
-                LabeledContent {
-                    TextField(text: $httpPort, prompt: Text(verbatim: "8080")) {
-                        EmptyView()
-                    }
-                    .frame(width: 100)
-                    .fixedSize(horizontal: true, vertical: false)
-                    // Add onChange modifier to filter input
-                    .onChange(of: httpPort) { newValue in
-                        httpPort = newValue.filter { $0.isNumber }
-                    }
-                } label: {
-                    AdvancedTabItemView(
-                        color: getHttpIconColor(),
-                        icon: .externaldriveConnectedToLineBelow,
-                        labelText: "setting.advance.http_port",
-                        subtitleText: "setting.advance.http_port_desc"
-                    )
-                }
-            } header: {
-                Text("setting.advance.header.http_server")
-            }
-
             AdvancedTabAnkiSection()
             // Vocabulary notebook
             Section {
@@ -457,16 +381,11 @@ struct AdvancedTab: View {
 
     @Default(.enableBetaFeature) private var enableBetaFeature
 
-    @Default(.defaultTTSServiceType) private var defaultTTSServiceType
-    @Default(.preferYoudaoTTSForEnglishWord) private var preferYoudaoTTSForEnglishWord
-    @Default(.enableYoudaoOCR) private var enableYoudaoOCR
     @Default(.enableCompatibilityReplace) private var enableCompatibilityReplace
     @Default(.minClassicalChineseTextDetectLength) private var minClassicalChineseTextDetectLength
     @Default(.enableOCRTextNormalization) private var enableOCRTextNormalization
     @Default(.showOCRMenuItems) private var showOCRMenuItems
-    @Default(.isScreenshotTipLayerHidden) private var isScreenshotTipLayerHidden
     @Default(.autoSelectAllTextFieldText) private var autoSelectAllTextFieldText
-    @Default(.preferAppleScriptAPI) private var preferAppleScriptAPI
 
     // Force get selected text
     @Default(.enableForceGetSelectedText) private var enableForceGetSelectedText
@@ -489,9 +408,6 @@ struct AdvancedTab: View {
     @Default(.pinWindowWhenDisplayed) private var pinWindowWhenDisplayed
     @Default(.hideMainWindow) private var hideMainWindow
 
-    @Default(.enableHTTPServer) private var enableHTTPServer
-    @Default(.httpPort) private var httpPort
-
     @Default(.enableVocabularyNotebook) private var enableVocabularyNotebook
     @Default(.vocabularyNotebookDirectory) private var vocabularyNotebookDirectory
 
@@ -502,11 +418,6 @@ struct AdvancedTab: View {
         vocabularyNotebookDirectory.isEmpty
             ? String(localized: "setting.advance.vocabulary_notebook_directory_placeholder")
             : vocabularyNotebookDirectory
-    }
-
-    /// Returns Color.green if `enableHTTPServer` is true, returns Color.red otherwise.
-    private func getHttpIconColor() -> Color {
-        enableHTTPServer ? .green : .red
     }
 
     /// Presents an `NSOpenPanel` for choosing the vocabulary notebook directory.

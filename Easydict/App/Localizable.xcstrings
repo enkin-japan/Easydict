@@ -11419,6 +11419,34 @@
         }
       }
     },
+    "service.reading.name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reading (Furigana / Pinyin)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み（振り仮名 / ピンイン）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注音（假名 / 拼音）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注音（假名 / 拼音）"
+          }
+        }
+      }
+    },
     "service.mdict.section.dictionaries" : {
       "localizations" : {
         "en" : {

@@ -16,7 +16,8 @@ static NSString *kMethod = @"method";
 
 BOOL EZResultNeedsDictionaryHTMLHeight(EZQueryResult *result) {
     return [result.serviceTypeWithUniqueIdentifier isEqualToString:EZServiceTypeAppleDictionary] ||
-           [result.serviceTypeWithUniqueIdentifier isEqualToString:EZServiceTypeMDict];
+           [result.serviceTypeWithUniqueIdentifier isEqualToString:EZServiceTypeMDict] ||
+           [result.serviceTypeWithUniqueIdentifier isEqualToString:EZServiceTypeReading];
 }
 
 BOOL EZResultShouldRenderDictionaryHTML(EZQueryResult *result) {

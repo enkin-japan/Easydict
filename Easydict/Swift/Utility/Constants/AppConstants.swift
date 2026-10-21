@@ -17,8 +17,8 @@ import Foundation
 final class AppConstants: NSObject {
     // MARK: - App
 
-    static let bundleID = "com.izual.Easydict"
-    static let debugBundleID = "com.izual.Easydict-debug"
+    static let bundleID = "dev.enkin.EasydictSlim"
+    static let debugBundleID = "dev.enkin.EasydictSlim-debug"
 
     // MARK: - Repository
 

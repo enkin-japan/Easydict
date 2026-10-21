@@ -84,8 +84,6 @@ class MyConfiguration: NSObject {
     @DefaultsWrapper(.autoQueryWhenTextChanged) var autoQueryWhenTextChanged: Bool
     @DefaultsWrapper(.autoPlayAudio) var autoPlayAudio: Bool
     @DefaultsWrapper(.pronunciation) var pronunciation: EnglishPronunciation
-    @DefaultsWrapper(.preferYoudaoTTSForEnglishWord) var preferYoudaoTTSForEnglishWord: Bool
-
     @DefaultsWrapper(.autoCopySelectedText) var autoCopySelectedText: Bool
     @DefaultsWrapper(.autoCopyOCRText) var autoCopyOCRText: Bool
     @DefaultsWrapper(.autoCopyFirstTranslatedText) var autoCopyFirstTranslatedText: Bool
@@ -114,8 +112,6 @@ class MyConfiguration: NSObject {
     @DefaultsWrapper(.formerMiniScreenVisibleFrame) var formerMiniScreenVisibleFrame: CGRect
     @DefaultsWrapper(.enableAnkiConnect) var enableAnkiConnect: Bool
 
-    @DefaultsWrapper(.preferAppleScriptAPI) var preferAppleScriptAPI: Bool
-
     // Max window height percentage, e.g., 80 means 80% of the screen height
     @DefaultsWrapper(.maxWindowHeightPercentage) var maxWindowHeightPercentage: Int
 
@@ -127,34 +123,29 @@ class MyConfiguration: NSObject {
     @ShortcutWrapper(.appleDictionaryShortcut) var appleDictShortcutString: String
     @ShortcutWrapper(.eudicShortcut) var eudicDictShortcutString: String
 
-    let updater = GlobalContext.shared.updaterController.updater
     let fontSizes: [CGFloat] = [1, 1.1, 1.2, 1.3, 1.4]
     var disabledAutoSelect: Bool = false
     var isRecordingSelectTextShortcutKey: Bool = false
     var cancellables: Set<AnyCancellable> = []
+
+    /// Slim build: Youdao online word audio is not used.
+    var preferYoudaoTTSForEnglishWord: Bool { false }
+
+    /// Slim build: AppleScript is never used.
+    var preferAppleScriptAPI: Bool { false }
 
     var fontSizeRatio: CGFloat {
         let safeIndex = max(0, min(Int(fontSizeIndex), fontSizes.count - 1))
         return fontSizes[safeIndex]
     }
 
-    var automaticallyChecksForUpdates: Bool {
-        get {
-            updater.automaticallyChecksForUpdates
-        }
-        set {
-            updater.automaticallyChecksForUpdates = newValue
-            logSettings(["automatically_checks_for_updates": newValue])
-        }
-    }
-
+    /// Slim build: system TTS only (offline, no network).
     var defaultTTSServiceType: ServiceType {
         get {
-            ServiceType(rawValue: Defaults[.defaultTTSServiceType].rawValue)
+            ServiceType(rawValue: TTSServiceType.apple.rawValue)
         }
         set {
-            Defaults[.defaultTTSServiceType] =
-                TTSServiceType(rawValue: newValue.rawValue) ?? .youdao
+            Defaults[.defaultTTSServiceType] = .apple
         }
     }
 
@@ -434,17 +425,6 @@ class MyConfiguration: NSObject {
             EZWindowManager.shared().updateWindowsTitlebarButtonsToolTip()
         }
         .store(in: &cancellables)
-
-        Defaults.publisher(.enableHTTPServer)
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { change in
-                let isOn = change.newValue
-                Task {
-                    await VaporServer.shared.startServer(isOn: isOn)
-                }
-            }
-            .store(in: &cancellables)
     }
 }
 
@@ -480,10 +460,6 @@ extension MyConfiguration {
         EZWindowManager.shared().updatePopButtonQueryAction()
 
         logSettings(["click_query": clickQuery])
-    }
-
-    fileprivate func didSetAutomaticallyChecksForUpdates() {
-        logSettings(["automatically_checks_for_updates": automaticallyChecksForUpdates])
     }
 
     fileprivate func didSetHideMainWindow() {

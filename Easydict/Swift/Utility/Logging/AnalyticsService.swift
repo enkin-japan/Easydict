@@ -6,84 +6,28 @@
 //  Copyright © 2025 izual. All rights reserved.
 //
 
-import FirebaseAnalytics
-import FirebaseCore
 import Foundation
-import Sentry
 
-/// Provides analytics and crash logging utilities.
+/// Slim build: analytics and crash reporting (Firebase / Sentry) are removed.
+/// The API is kept as no-ops so existing call sites do not need to change.
 @objc(EZAnalyticsService)
 @objcMembers
 final class AnalyticsService: NSObject {
-    // MARK: Internal
-
-    /// Configures crash logging services in non-debug builds.
     @objc(setupCrashLogService)
-    static func setupCrashService() {
-        #if !DEBUG
-        configureFirebaseIfNeeded()
-        SentrySDK.start { options in
-            options.dsn = SecretKeyManager.keyValues["sentryDSN"]
-            options.debug = true
-            options.tracesSampleRate = NSNumber(value: 0.1)
-            options.swiftAsyncStacktraces = true
-        }
-        #endif
-    }
+    static func setupCrashService() {}
 
-    /// Enables or disables crash logging, and always disables it in debug builds.
-    static func setCrashEnabled(_ enabled: Bool) {
-        #if DEBUG
-        SentrySDK.close()
-        #else
-        if enabled {
-            setupCrashService()
-        } else {
-            SentrySDK.close()
-        }
-        #endif
-    }
+    static func setCrashEnabled(_ enabled: Bool) {}
 
-    /// Logs an analytics event with the given name and parameters.
-    ///
-    /// - Note: Event names must contain only letters, numbers, or underscores.
-    /// - Parameters should use string keys and values that are compatible with analytics.
     @objc(logEventWithName:parameters:)
-    static func logEvent(withName name: String, parameters: [String: Any]?) {
-        guard MyConfiguration.shared.allowAnalytics else {
-            return
-        }
+    static func logEvent(withName name: String, parameters: [String: Any]?) {}
 
-        #if !DEBUG
-        Analytics.logEvent(name, parameters: parameters)
-        #endif
-    }
-
-    /// Logs window appearance events.
     @objc(logWindowAppear:)
-    static func logWindowAppear(_ windowType: EZWindowType) {
-        let windowName = EZEnumTypes.windowName(windowType)
-        let name = "show_\(windowName)"
-        logEvent(withName: name, parameters: nil)
-    }
+    static func logWindowAppear(_ windowType: EZWindowType) {}
 
-    /// Logs query service usage for analytics.
     @objc(logQueryService:)
-    static func logQueryService(_ service: QueryService) {
-        let model = service.queryModel
+    static func logQueryService(_ service: QueryService) {}
 
-        let textLengthRange = textLengthRange(model.queryText)
-        let parameters: [String: Any] = [
-            "serviceType": service.serviceType().rawValue,
-            "actionType": model.actionType.rawValue,
-            "from": model.queryFromLanguage.rawValue,
-            "to": model.queryTargetLanguage.rawValue,
-            "textLength": textLengthRange,
-        ]
-        logEvent(withName: "query_service", parameters: parameters)
-    }
-
-    /// Returns a human-readable text length range.
+    /// Returns a human-readable text length range (still used for local logging).
     static func textLengthRange(_ text: String) -> String {
         let length = text.utf16.count
         if length <= 10 {
@@ -101,25 +45,5 @@ final class AnalyticsService: NSObject {
         }
     }
 
-    /// Logs basic app information for analytics.
-    static func logAppInfo() {
-        let version = DeviceSystemInfo.getSystemVersion()
-        let parameters: [String: Any] = [
-            "system_version": version,
-        ]
-        logEvent(withName: "app_info", parameters: parameters)
-    }
-
-    // MARK: Private
-
-    private static let firebaseConfigurationToken: () = {
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure()
-        }
-    }()
-
-    /// Ensures Firebase is configured only once.
-    private static func configureFirebaseIfNeeded() {
-        _ = firebaseConfigurationToken
-    }
+    static func logAppInfo() {}
 }

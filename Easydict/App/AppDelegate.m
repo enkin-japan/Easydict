@@ -24,6 +24,9 @@
     [EZWindowManager.shared showMainWindowIfNeeded];
     
     [self registerRouters];
+
+    // Slim build: right click → Services → Easydict (no permissions required).
+    [EZSystemServiceProvider.shared registerProvider];
     
     [DarkModeManager.shared updateDarkMode:MyConfiguration.shared.appearance];
 

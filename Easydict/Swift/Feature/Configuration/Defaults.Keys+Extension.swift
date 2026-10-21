@@ -72,14 +72,14 @@ extension Defaults.Keys {
     )
     static let defaultTTSServiceType = Key<TTSServiceType>(
         "EZConfiguration_kDefaultTTSServiceTypeKey",
-        default: TTSServiceType.youdao
+        default: TTSServiceType.apple
     )
     /// When enabled, English words are spoken via Youdao TTS regardless of the
     /// configured default TTS service. Defaults to `true` to preserve the long
     /// standing behavior of using Youdao's high quality dictionary recordings.
     static let preferYoudaoTTSForEnglishWord = Key<Bool>(
         "EZConfiguration_kPreferYoudaoTTSForEnglishWordKey",
-        default: true
+        default: false
     )
     static let showGoogleQuickLink = Key<Bool>("EZConfiguration_kShowGoogleLinkKey", default: true)
     static let showEudicQuickLink = Key<Bool>("EZConfiguration_kShowEudicLinkKey", default: true)
@@ -221,7 +221,7 @@ extension Defaults.Keys {
 
     static let preferAppleScriptAPI = Key<Bool>(
         "EZConfiguration_kPreferAppleScriptAPI",
-        default: true
+        default: false
     )
 
     /// Cannot use NSScreen, so we use CGRect to record the screen visible frame for EZShowWindowPositionFormer
@@ -404,7 +404,7 @@ extension Defaults.Keys {
 
     // Doubao
     static let doubaoAPIKey = Key<String>(EZDoubaoAPIKey, default: "")
-    static let doubaoModel = Key<String>(EZDoubaoModelKey, default: DoubaoService.defaultModelIdentifier)
+    static let doubaoModel = Key<String>(EZDoubaoModelKey, default: "doubao-seed-translation-250915")
 }
 
 /// shortcut

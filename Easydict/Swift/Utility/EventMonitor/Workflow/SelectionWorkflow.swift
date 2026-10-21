@@ -47,25 +47,21 @@ final class SelectionWorkflow {
                 let text = try await systemUtility.getSelectedText(strategy: .accessibility)?.trim() ?? ""
                 let editable = systemUtility.isFocusedTextField()
                 isSelectedTextEditable = editable
-                let frontmostBundleID = frontmostApp?.bundleIdentifier ?? ""
-                let isBrowser = AppleScriptTask.isBrowserSupportingAppleScript(frontmostBundleID)
-                let preferAppleScript = MyConfiguration.shared.preferAppleScriptAPI
-
+                // Slim build: browsers are read through Accessibility like any other app;
+                // AppleScript (and its Automation permission prompt) is never used.
                 if !text.isEmpty {
                     if MyConfiguration.shared.autoSelectText {
                         let startMonitoring = onStartMonitoringKeyboard ?? self.onStartMonitoringKeyboard
                         await startMonitoring?()
                     }
-                    if !isBrowser || !preferAppleScript {
-                        completion(
-                            .init(
-                                text: text,
-                                selectTextType: .accessibility,
-                                isEditable: editable
-                            )
+                    completion(
+                        .init(
+                            text: text,
+                            selectTextType: .accessibility,
+                            isEditable: editable
                         )
-                        return
-                    }
+                    )
+                    return
                 }
 
                 if contextProvider?.useAccessibilityForFirstTime() == true {
@@ -75,15 +71,6 @@ final class SelectionWorkflow {
                         completion(nil)
                         return
                     }
-                }
-
-                if isBrowser {
-                    await getSelectedTextFromBrowser(
-                        bundleID: frontmostBundleID,
-                        accessibilityFallback: text,
-                        completion: completion
-                    )
-                    return
                 }
 
                 if text.isEmpty {
@@ -123,39 +110,6 @@ final class SelectionWorkflow {
 
     private func updateEndPoint() {
         EventMonitor.shared.endPoint = NSEvent.mouseLocation
-    }
-
-    private func getSelectedTextFromBrowser(
-        bundleID: String,
-        accessibilityFallback: String,
-        completion: @escaping (SelectedTextSnapshot?) -> ()
-    ) async {
-        do {
-            let selectedText = try await AppleScriptTask.getSelectedTextFromBrowser(bundleID)
-            let trimmed = selectedText?.trim() ?? ""
-            if !trimmed.isEmpty {
-                let isEditable = systemUtility?.isFocusedTextField() ?? false
-                isSelectedTextEditable = isEditable
-                completion(.init(text: trimmed, selectTextType: .appleScript, isEditable: isEditable))
-                return
-            }
-            logInfo("AppleScript get selected text is empty, try to use force get selected text for browser")
-            tryForceGetSelectedText(completion)
-        } catch {
-            logError("Failed to get selected text from browser: \(error)")
-            if !accessibilityFallback.isEmpty {
-                logInfo("Fallback to use Accessibility selected text: \(accessibilityFallback)")
-                let isEditable = systemUtility?.isFocusedTextField() ?? false
-                isSelectedTextEditable = isEditable
-                completion(.init(
-                    text: accessibilityFallback,
-                    selectTextType: .accessibility,
-                    isEditable: isEditable
-                ))
-                return
-            }
-            tryForceGetSelectedText(completion)
-        }
     }
 
     private func handleForceGetSelectedTextOnAXError(

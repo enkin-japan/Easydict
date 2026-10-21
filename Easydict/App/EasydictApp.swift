@@ -9,7 +9,6 @@
 import Combine
 import Defaults
 import SettingsAccess
-import Sparkle
 import SwiftUI
 
 // MARK: - EasydictCmpatibilityEntry
@@ -143,14 +142,11 @@ struct EasydictApp: App {
     @Default(.selectedMenuBarIcon) private var menuBarIcon
 
     @MainActor
-    private static func performPostLaunchTasks() {
-        GitHubCopilotModelStore.shared.startAutomaticRefresh()
-    }
+    private static func performPostLaunchTasks() {}
 
     /// Persist queued writes synchronously; an asynchronous task may not run before exit.
     @MainActor
     private static func performTerminationTasks() {
-        GitHubCopilotModelStore.shared.stopAutomaticRefresh()
         VocabularyNotebookService.shared.flush()
     }
 }

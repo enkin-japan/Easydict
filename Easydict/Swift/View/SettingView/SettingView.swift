@@ -52,10 +52,6 @@ struct SettingView: View {
                 .tabItem { Label("advanced", systemImage: "gearshape.2") }
                 .tag(SettingTab.advanced)
 
-            PrivacyTab()
-                .tabItem { Label("privacy", systemImage: "hand.raised.square") }
-                .tag(SettingTab.privacy)
-
             AboutTab()
                 .tabItem { Label("setting.about", systemImage: "info.bubble") }
                 .tag(SettingTab.about)

@@ -8,7 +8,7 @@
 
 import AppKit
 import Foundation
-import SystemPackage
+import System
 import UniformTypeIdentifiers
 
 // MARK: - Constants

@@ -505,9 +505,7 @@
 }
 
 - (void)copilotModelsDidChange:(NSNotification *)notification {
-    if ([self.service isKindOfClass:EZGitHubCopilotService.class]) {
-        [self updateServiceModelButton];
-    }
+    // Slim build: GitHub Copilot service removed.
 }
 
 #pragma mark - Animation
