@@ -7,15 +7,15 @@
 **删除**
 - 截图翻译 / 静默截图 OCR（不再需要“屏幕录制”权限）
 - AppleScript 浏览器取词与取网址（不再需要“自动化”权限，浏览器改走辅助功能）
-- 所有云端翻译与云端大模型服务：Gemini、Claude、DeepSeek、Groq、智谱、MiniMax、GitHub Models、豆包、阿里、火山、腾讯、彩云、小牛、内置 AI、润色/摘要、Claude Code、GitHub Copilot
+- 除 OpenAI 外的云端翻译与云端大模型服务：Gemini、Claude、DeepSeek、Groq、智谱、MiniMax、GitHub Models、豆包、阿里、火山、腾讯、彩云、小牛、内置 AI、润色/摘要、Claude Code、GitHub Copilot
 - 内置 API Key、HTTP 服务器（Vapor）
 - Firebase 统计、Sentry 崩溃上报、隐私设置页
 - 在线语种识别优化（Google/百度）、有道 OCR、有道/必应/谷歌在线发音
 
 **保留**
-- 查询服务：Apple 词典、MDict、Ollama、自定义 OpenAI 兼容 API（可多个实例）
+- 查询服务：Apple 词典、MDict、Ollama、OpenAI 官方 API（需自备 API Key）、自定义 OpenAI 兼容 API（可多个实例）
 - 划词翻译（需要辅助功能权限）、输入翻译、剪贴板翻译
-- 系统 TTS 朗读、生词本、Anki 导出、图片 OCR（剪贴板里的图片，用系统 Vision 离线识别）
+- 生词本、Anki 导出、图片 OCR（剪贴板里的图片，用系统 Vision 离线识别）
 
 **新增**
 - **注音服务**（默认启用，完全离线）：日语显示振り仮名，中文显示带声调拼音；
@@ -29,6 +29,15 @@
 - **思考开关**（Ollama / 自定义 OpenAI 服务设置）：通过 Ollama 的 `/api/show` 检测当前模型，只有明确支持
   开关思考时才可操作，默认关闭（请求带 `reasoning_effort: none`，打开时为 `high`）；明确不支持或无法判断时
   开关置灰，请求保持原来的服务端默认。自定义 OpenAI 只对本机和局域网地址检测，不会向云端服务发额外请求。
+- **发音**（设置 › 高级 › 发音）：引擎可选“系统声音”或“本地 TTS（OpenAI 兼容）”。
+  - 系统声音改用 `AVSpeechSynthesizer`，默认自动选质量最高的语音（高品质 > 增强 > 普通，排除 Eloquence、
+    MacinTalk 和趣味音色），中文、日语、英语可分别指定。Siri 语音不对第三方 App 开放，想要更好的系统音质需在
+    “系统设置 › 辅助功能 › 朗读内容 › 系统语音 › 管理语音”下载增强/高品质语音。
+  - 本地 TTS 调用 `POST /v1/audio/speech`（OpenAI 的语音接口，Kokoro-FastAPI、mlx-audio、LocalAI 等都兼容），
+    可配置地址、API Key、模型和中文/日语/英语/其他语言各自的 voice；默认值对应本机 Kokoro-FastAPI
+    （`http://localhost:8880/v1/audio/speech`、`kokoro`、`zf_xiaobei` / `jf_alpha` / `af_heart`）。
+    请求失败时自动改用系统声音；最近 50 条音频缓存在内存里，重复播放不再请求；每一行都有试听按钮，
+    试听失败会显示服务器返回的错误。
 - **右键 → 服务**（零权限）：
   - `Easydict 查询`：用选中文字打开查询窗口
   - `Easydict 翻译并替换`：用第一个启用的 Ollama / 自定义 OpenAI 服务翻译，直接替换选中文字（写邮件回复时用）
@@ -38,7 +47,7 @@
   其他 Mac 下载后也能直接打开。Debug 仍是本机 ad-hoc 签名。
 - Sparkle 自动更新改为读取本 fork 的 `appcast.xml`（`dev` 分支），菜单栏菜单和 App 菜单都有“检查更新”。
 
-以下服务的源码还留在工程里，但**没有注册、不会出现、不会联网**：有道、DeepL、Google、Bing、百度、OpenAI、Codex CLI。
+以下服务的源码还留在工程里，但**没有注册、不会出现、不会联网**：有道、DeepL、Google、Bing、百度、Codex CLI。
 它们与语种识别、发音等模块耦合较深，等第一次编译通过后可以再逐个物理删除。
 
 ## 编译

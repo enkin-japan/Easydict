@@ -7,60 +7,21 @@
 //
 
 import AVFoundation
+import Defaults
 import Foundation
 
 // MARK: - AppleSpeechService
 
+/// Picks `AVSpeechSynthesizer` voices. Third-party apps only see compact, Eloquence and
+/// downloaded Enhanced/Premium voices; Siri voices stay private to Apple's own processes.
 @objc
 public class AppleSpeechService: NSObject {
     // MARK: Public
 
-    /// Play text using system speech synthesizer
-    @objc
-    public func playAudio(
-        text: String,
-        language: Language,
-        completion: @escaping (Error?) -> ()
-    )
-        -> NSSpeechSynthesizer? {
-        let voiceIdentifier = voiceIdentifier(for: language) ?? "com.apple.voice.compact.en-US.Samantha"
-        print("Language: \(language), Voice Identifier: \(voiceIdentifier)")
-        print("System speak: \(text)")
-
-        let synthesizer = NSSpeechSynthesizer(voice: .init(rawValue: voiceIdentifier))
-
-        // Adjust rate for English
-        if language == .english {
-            synthesizer?.rate = 150
-        }
-
-        synthesizer?.startSpeaking(text)
-        completion(nil)
-
-        return synthesizer
-    }
-
-    /// Get available voices for language
+    /// Identifiers of the installed voices for `language`, best first.
     @objc
     public func availableVoices(for language: Language) -> [String] {
-        let localeIdentifier = localeIdentifier(for: language)
-        let availableVoices = NSSpeechSynthesizer.availableVoices
-
-        var matchingVoices: [String] = []
-
-        for voice in availableVoices {
-            let attributes = NSSpeechSynthesizer.attributes(forVoice: voice)
-            if let voiceLocale = attributes[NSSpeechSynthesizer.VoiceAttributeKey.localeIdentifier]
-                as? String,
-                voiceLocale == localeIdentifier {
-                if let voiceId = attributes[NSSpeechSynthesizer.VoiceAttributeKey.identifier]
-                    as? String {
-                    matchingVoices.append(voiceId)
-                }
-            }
-        }
-
-        return matchingVoices
+        voices(forLocale: localeIdentifier(for: language)).map(\.identifier)
     }
 
     // MARK: Internal
@@ -96,28 +57,62 @@ public class AppleSpeechService: NSObject {
         return 0
     }
 
-    // MARK: Private
-
-    private func voiceIdentifier(for language: Language) -> String? {
-        let localeIdentifier = localeIdentifier(for: language)
-        let availableVoices = NSSpeechSynthesizer.availableVoices
-
-        var matchingVoices: [String] = []
-
-        for voice in availableVoices {
-            let attributes = NSSpeechSynthesizer.attributes(forVoice: voice)
-            if let voiceLocale = attributes[NSSpeechSynthesizer.VoiceAttributeKey.localeIdentifier]
-                as? String,
-                voiceLocale == localeIdentifier,
-                let voiceId = attributes[NSSpeechSynthesizer.VoiceAttributeKey.identifier] as? String {
-                matchingVoices.append(voiceId)
-            }
+    /// The voice for `language`: the user's choice while it is installed, otherwise the best one.
+    func voice(for language: Language) -> AVSpeechSynthesisVoice? {
+        if let key = SpeechVoiceLanguage(language).systemVoiceKey,
+           case let identifier = Defaults[key], !identifier.isEmpty,
+           let chosen = AVSpeechSynthesisVoice(identifier: identifier) {
+            return chosen
         }
 
-        return preferredVoiceIdentifier(from: matchingVoices)
+        let locale = localeIdentifier(for: language)
+        let prefix = String(locale.prefix { $0 != "-" })
+        return voices(forLocale: locale).first
+            ?? voices(languagePrefix: prefix).first
+            ?? AVSpeechSynthesisVoice(language: locale)
     }
 
+    /// Installed voices whose language starts with `prefix` (e.g. `zh`), best first.
+    func voices(languagePrefix prefix: String) -> [AVSpeechSynthesisVoice] {
+        sortedByQuality(speakableVoices().filter {
+            $0.language == prefix || $0.language.hasPrefix("\(prefix)-")
+        })
+    }
+
+    // MARK: Private
+
+    /// Installed voices for a BCP 47 locale such as `zh-CN`, best first.
+    private func voices(forLocale locale: String) -> [AVSpeechSynthesisVoice] {
+        sortedByQuality(speakableVoices().filter { $0.language == locale })
+    }
+
+    /// Excludes novelty voices (Bubbles, Zarvox, ...) and the user's Personal Voice (macOS 14+).
+    private func speakableVoices() -> [AVSpeechSynthesisVoice] {
+        AVSpeechSynthesisVoice.speechVoices().filter { voice in
+            guard #available(macOS 14.0, *) else { return true }
+            return !voice.voiceTraits.contains(.isNoveltyVoice)
+                && !voice.voiceTraits.contains(.isPersonalVoice)
+        }
+    }
+
+    /// Premium > Enhanced > default; within a tier, regular voices (Samantha, Tingting) before
+    /// the robotic legacy MacinTalk (Fred, Kathy) and Eloquence (Eddy, Flo) ones.
+    private func sortedByQuality(_ voices: [AVSpeechSynthesisVoice]) -> [AVSpeechSynthesisVoice] {
+        func rank(_ voice: AVSpeechSynthesisVoice) -> Int {
+            let isLegacy = voice.identifier.hasPrefix("com.apple.speech.synthesis.")
+                || voice.identifier.contains(".eloquence.")
+            return voice.quality.rawValue * 2 + (isLegacy ? 0 : 1)
+        }
+        return voices.sorted {
+            let lhs = rank($0), rhs = rank($1)
+            return lhs != rhs ? lhs > rhs : $0.name.localizedStandardCompare($1.name) == .orderedAscending
+        }
+    }
+
+    /// Classical Chinese has no Apple locale of its own; it is read in Mandarin.
     private func localeIdentifier(for language: Language) -> String {
-        AppleLanguageMapper.shared.supportedLanguages[language] ?? "en_US"
+        let language = language == .classicalChinese ? .simplifiedChinese : language
+        return (AppleLanguageMapper.shared.supportedLanguages[language] ?? "en_US")
+            .replacingOccurrences(of: "_", with: "-")
     }
 }

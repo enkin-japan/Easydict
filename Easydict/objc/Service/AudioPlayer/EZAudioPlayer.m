@@ -17,10 +17,9 @@ static NSString *const kFileExtendedAttributes = @"NSFileExtendedAttributes";
 // kMDItemWhereFroms
 static NSString *const kItemWhereFroms = @"com.apple.metadata:kMDItemWhereFroms";
 
-@interface EZAudioPlayer () <NSSpeechSynthesizerDelegate>
+@interface EZAudioPlayer ()
 
-@property (nonatomic, strong) EZAppleService *appleService;
-@property (nonatomic, strong) NSSpeechSynthesizer *synthesizer;
+@property (nonatomic, strong) EZSpeechPlayer *speechPlayer;
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) AVPlayerItem *playerItem;
 
@@ -98,11 +97,11 @@ static NSString *const kItemWhereFroms = @"com.apple.metadata:kMDItemWhereFroms"
 
 #pragma mark - Getter
 
-- (EZAppleService *)appleService {
-    if (!_appleService) {
-        _appleService = [[EZAppleService alloc] init];
+- (EZSpeechPlayer *)speechPlayer {
+    if (!_speechPlayer) {
+        _speechPlayer = [[EZSpeechPlayer alloc] init];
     }
-    return _appleService;
+    return _speechPlayer;
 }
 
 - (AVPlayer *)player {
@@ -127,10 +126,6 @@ static NSString *const kItemWhereFroms = @"com.apple.metadata:kMDItemWhereFroms"
         EZQueryService *defaultTTSService = [QueryServiceFactory.shared serviceWithTypeId:defaultTTSServiceType];
         _defaultTTSService = defaultTTSService;
         _defaultTTSService.audioPlayer = self;
-
-        if (defaultTTSServiceType == EZServiceTypeApple) {
-            self.appleService = (EZAppleService *)defaultTTSService;
-        }
     }
     return _defaultTTSService;
 }
@@ -246,27 +241,23 @@ static NSString *const kItemWhereFroms = @"com.apple.metadata:kMDItemWhereFroms"
     // !!!: This method won't post play end notification.
     [_player pause];
 
-    // It wiil call delegate.
-    [_synthesizer stopSpeaking];
+    [_speechPlayer stop];
 
-    self.isPlaying = NO;
-}
-
-
-#pragma mark - NSSpeechSynthesizerDelegate
-
-- (void)speechSynthesizer:(NSSpeechSynthesizer *)sender didFinishSpeaking:(BOOL)finishedSpeaking {
     self.isPlaying = NO;
 }
 
 
 #pragma mark -
 
-/// Play system text audio.
+/// Speak text with the engine chosen in settings (system voice or local TTS).
 - (void)playSystemTextAudio:(NSString *)text language:(EZLanguage)language {
-    NSSpeechSynthesizer *synthesizer = [self.appleService playTextAudio:text textLanguage:language];
-    synthesizer.delegate = self;
-    self.synthesizer = synthesizer;
+    [_player pause];
+
+    // Set after speak:, which first stops (and completes) any previous utterance.
+    __weak typeof(self) weakSelf = self;
+    [self.speechPlayer speak:text language:language completion:^{
+        weakSelf.isPlaying = NO;
+    }];
     self.isPlaying = YES;
 }
 

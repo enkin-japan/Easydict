@@ -134,12 +134,6 @@ public class AppleService: QueryService {
         languageDetector.detectLanguage(text: text)
     }
 
-    /// Play text audio using system speech synthesizer
-    @objc
-    public func playTextAudio(_ text: String, textLanguage: Language) -> NSSpeechSynthesizer? {
-        speechService.playAudio(text: text, language: textLanguage) { _ in }
-    }
-
     /// Convert NLLanguage to Language enum
     @objc
     public func languageEnum(fromAppleLanguage appleLanguage: NLLanguage) -> Language {
@@ -170,7 +164,6 @@ public class AppleService: QueryService {
     private let ocrEnginee = AppleOCREngine()
     private let languageMapper = AppleLanguageMapper.shared
     private let languageDetector = AppleLanguageDetector(enableDebugLog: true)
-    private let speechService = AppleSpeechService()
 
     private var translationService: Any? // Use Any to avoid compile-time type checking
 

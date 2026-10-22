@@ -34,9 +34,10 @@ struct AdvancedTab: View {
 
             // Items image color order: blue, green, orange, purple, red, mint, yellow, cyan, indigo
 
+            AdvancedTabSpeechSection()
+
             // General settings section
             Section {
-                // Slim build: TTS is fixed to the offline system voice.
                 LabeledContent {
                     TextField(
                         text: $minClassicalChineseTextDetectLength,

@@ -111,7 +111,7 @@ final class QueryServiceFactory: NSObject {
 
     // MARK: Private
 
-    /// Slim build: only local / self-hosted services are registered.
+    /// Slim build: local / self-hosted services plus the official OpenAI API are registered.
     /// Other service classes stay in the project (some are shared infrastructure,
     /// e.g. `AppleService` handles language detection and system TTS) but are not offered.
     private let serviceRegistrations: [ServiceRegistration] = [
@@ -119,6 +119,7 @@ final class QueryServiceFactory: NSObject {
         .init(.mDict, MDictService.self, "service.mdict.name", apiKeyRequirement: .none),
         .init(.reading, ReadingService.self, "service.reading.name", apiKeyRequirement: .none),
         .init(.ollama, OllamaService.self, "ollama_translate", apiKeyRequirement: .none),
+        .init(.openAI, OpenAIService.self, "openai_translate"),
         .init(.customOpenAI, CustomOpenAIService.self, "custom_openai", allowsMultipleInstances: true),
     ]
 

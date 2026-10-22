@@ -81,6 +81,22 @@ extension Defaults.Keys {
         "EZConfiguration_kPreferYoudaoTTSForEnglishWordKey",
         default: false
     )
+    static let speechEngine = Key<SpeechEngine>("EZConfiguration_kSpeechEngineKey", default: .system)
+    /// System voice identifiers chosen per language; empty means the best installed voice.
+    static let systemVoiceChinese = Key<String>("EZConfiguration_kSystemVoiceChineseKey", default: "")
+    static let systemVoiceJapanese = Key<String>("EZConfiguration_kSystemVoiceJapaneseKey", default: "")
+    static let systemVoiceEnglish = Key<String>("EZConfiguration_kSystemVoiceEnglishKey", default: "")
+    /// OpenAI-compatible TTS server; the defaults match a local Kokoro-FastAPI.
+    static let ttsEndpoint = Key<String>(
+        "EZConfiguration_kTTSEndpointKey",
+        default: "http://localhost:8880/v1/audio/speech"
+    )
+    static let ttsAPIKey = Key<String>("EZConfiguration_kTTSAPIKeyKey", default: "")
+    static let ttsModel = Key<String>("EZConfiguration_kTTSModelKey", default: "kokoro")
+    static let ttsVoiceChinese = Key<String>("EZConfiguration_kTTSVoiceChineseKey", default: "zf_xiaobei")
+    static let ttsVoiceJapanese = Key<String>("EZConfiguration_kTTSVoiceJapaneseKey", default: "jf_alpha")
+    static let ttsVoiceEnglish = Key<String>("EZConfiguration_kTTSVoiceEnglishKey", default: "af_heart")
+    static let ttsVoiceOther = Key<String>("EZConfiguration_kTTSVoiceOtherKey", default: "af_heart")
     static let showGoogleQuickLink = Key<Bool>("EZConfiguration_kShowGoogleLinkKey", default: true)
     static let showEudicQuickLink = Key<Bool>("EZConfiguration_kShowEudicLinkKey", default: true)
     static let showAppleDictionaryQuickLink = Key<Bool>(

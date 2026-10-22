@@ -598,6 +598,10 @@
 		FF0E0D7E9B429977C8961D49 /* OllamaThinkingProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511760451DEDA7EDCD85457B /* OllamaThinkingProbe.swift */; };
 		415E7EC45CE75D3AB5095A6D /* ThinkingToggleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4922029934AB617F9E6E4B8D /* ThinkingToggleCell.swift */; };
 		CF84913F137EEC3A67A53430 /* ReadingTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7EBADDF2FA77B6B1BDFF83D /* ReadingTable.swift */; };
+		01105F080636E8383E50021E /* SpeechEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036EC3EFAA52954D06758CA5 /* SpeechEngine.swift */; };
+		A70269F0B71F287179DD8144 /* OpenAICompatibleTTSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 905CC1A1DFA02BAD1D1F4036 /* OpenAICompatibleTTSClient.swift */; };
+		648B9702043B0695CCFEED59 /* SpeechPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A250650154853AC41482EE9F /* SpeechPlayer.swift */; };
+		3FEA8B66BDE373F526D3F839 /* AdvancedTabSpeechSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357FE4DB058611E4362B1EF /* AdvancedTabSpeechSection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1321,6 +1325,10 @@
 		511760451DEDA7EDCD85457B /* OllamaThinkingProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaThinkingProbe.swift; sourceTree = "<group>"; };
 		4922029934AB617F9E6E4B8D /* ThinkingToggleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingToggleCell.swift; sourceTree = "<group>"; };
 		A7EBADDF2FA77B6B1BDFF83D /* ReadingTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingTable.swift; sourceTree = "<group>"; };
+		036EC3EFAA52954D06758CA5 /* SpeechEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechEngine.swift; sourceTree = "<group>"; };
+		905CC1A1DFA02BAD1D1F4036 /* OpenAICompatibleTTSClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAICompatibleTTSClient.swift; sourceTree = "<group>"; };
+		A250650154853AC41482EE9F /* SpeechPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechPlayer.swift; sourceTree = "<group>"; };
+		6357FE4DB058611E4362B1EF /* AdvancedTabSpeechSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedTabSpeechSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1436,6 +1444,7 @@
 				0B6CC260EE5345A88A8DB738 /* SheetChevronRow.swift */,
 				71E61BD21DF447CDB6B01D74 /* AnkiConnectSettingsView.swift */,
 				276742052B3DC230002A2C75 /* AboutTab.swift */,
+				6357FE4DB058611E4362B1EF /* AdvancedTabSpeechSection.swift */,
 			);
 			path = TabView;
 			sourceTree = "<group>";
@@ -1952,6 +1961,7 @@
 				033C6DC32ED9D6D700AC39FC /* DeepL */,
 				031C66CB2ED9EB290025D190 /* Bing */,
 				7F1F99428B278902D88EDDED /* Reading */,
+				CAEB64DCF894F356B1ACC07D /* Speech */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -3624,6 +3634,16 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		CAEB64DCF894F356B1ACC07D /* Speech */ = {
+			isa = PBXGroup;
+			children = (
+				036EC3EFAA52954D06758CA5 /* SpeechEngine.swift */,
+				905CC1A1DFA02BAD1D1F4036 /* OpenAICompatibleTTSClient.swift */,
+				A250650154853AC41482EE9F /* SpeechPlayer.swift */,
+			);
+			path = Speech;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -4089,6 +4109,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3FEA8B66BDE373F526D3F839 /* AdvancedTabSpeechSection.swift in Sources */,
+				648B9702043B0695CCFEED59 /* SpeechPlayer.swift in Sources */,
+				A70269F0B71F287179DD8144 /* OpenAICompatibleTTSClient.swift in Sources */,
+				01105F080636E8383E50021E /* SpeechEngine.swift in Sources */,
 				CF84913F137EEC3A67A53430 /* ReadingTable.swift in Sources */,
 				415E7EC45CE75D3AB5095A6D /* ThinkingToggleCell.swift in Sources */,
 				FF0E0D7E9B429977C8961D49 /* OllamaThinkingProbe.swift in Sources */,
@@ -4712,7 +4736,7 @@
 		"CODE_SIGN_STYLE" = "$CODE_SIGN_STYLE";
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 70;
+		"CURRENT_PROJECT_VERSION" = 71;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = dwarf;
 		"DEVELOPMENT_TEAM" = "$(DEVELOPMENT_TEAM)";
@@ -4760,7 +4784,7 @@
 		"CODE_SIGN_STYLE" = Manual;
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 70;
+		"CURRENT_PROJECT_VERSION" = 71;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 		"DEVELOPMENT_TEAM" = "";
