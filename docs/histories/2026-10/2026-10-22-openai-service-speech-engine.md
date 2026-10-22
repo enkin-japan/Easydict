@@ -58,6 +58,9 @@ mlx-audio、LocalAI、openedai-speech 等都实现），同一套设置也能接
   - 系统声音引擎不发请求，英语自动选 `com.apple.voice.compact.en-US.Samantha`；指定 Eloquence Flo 时按指定朗读，
     指定不存在的语音时回到 Samantha。
 - 测试改动的 Debug 偏好设置已删除，模拟服务已停止。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；Release `v2.25.0-slim.5` 附 DMG
+  （SHA-256 `11baf548…d848`）与 Sparkle 更新包（25495610 字节），appcast 指向 build 71。
+- 本机：build 70 移入废纸篓（未清空）后从 DMG 安装 build 71，Gatekeeper 通过并已启动。
 - 未验证：没有运行真实的 Kokoro-FastAPI / mlx-audio；设置页布局未截图确认（终端无屏幕录制权限）；中文、日语只验证了
   选音逻辑，未在 App 中实际朗读。
 
@@ -76,6 +79,7 @@ mlx-audio、LocalAI、openedai-speech 等都实现），同一套设置也能接
 - `Easydict/App/Localizable.xcstrings`
 - `Easydict.xcodeproj/project.pbxproj`
 - `SLIM.md`
+- `appcast.xml`
 
 ### 后续事项
 
