@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Add Swift source files to a target in an Xcode project.pbxproj.
+"""Add Swift source files or bundle resources to a target in an Xcode project.pbxproj.
 
 Usage: pbx_add.py <project.pbxproj> <target-name> <file-path> [<file-path> ...]
 
 File paths are relative to the project root, e.g.
 "Easydict/Swift/Feature/SystemService/SystemServiceProvider.swift".
 Missing intermediate groups are created (as path-based <group> groups).
+`.swift` files go to the Sources build phase; any other file is copied as a resource.
 """
 
 import hashlib
@@ -55,7 +56,11 @@ def main():
         target_id = next(i for i, b in objs.items()
                          if "isa = PBXNativeTarget" in b and field(b, "name") == target_name)
         phases = re.findall(ID, re.search(r"buildPhases = \((.*?)\);", objs[target_id], re.S).group(1))
-        sources_id = next(p for p in phases if "isa = PBXSourcesBuildPhase" in objs[p])
+        is_source = rel.endswith(".swift")
+        phase_isa = "PBXSourcesBuildPhase" if is_source else "PBXResourcesBuildPhase"
+        phase_name = "Sources" if is_source else "Resources"
+        file_type = "sourcecode.swift" if is_source else "file"
+        sources_id = next(p for p in phases if f"isa = {phase_isa}" in objs[p])
 
         # walk / create groups
         parts = rel.split("/")
@@ -85,14 +90,14 @@ def main():
         file_id = new_id(f"file:{rel}", used)
         build_id = new_id(f"build:{rel}", used)
         text = insert_object(text, "PBXFileReference", file_id,
-                             f"/* {name} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; "
+                             f"/* {name} */ = {{isa = PBXFileReference; lastKnownFileType = {file_type}; "
                              f"path = {quoted}; sourceTree = \"<group>\"; }};")
         text = insert_object(text, "PBXBuildFile", build_id,
-                             f"/* {name} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_id} /* {name} */; }};")
+                             f"/* {name} in {phase_name} */ = {{isa = PBXBuildFile; fileRef = {file_id} /* {name} */; }};")
         text = add_child(text, gid, file_id, name)
         pat = re.compile(rf"(^\t\t{sources_id}(?: /\*.*?\*/)? = \{{\n.*?files = \(\n)", re.M | re.S)
         m = pat.search(text)
-        text = text[: m.end()] + f"\t\t\t\t{build_id} /* {name} in Sources */,\n" + text[m.end():]
+        text = text[: m.end()] + f"\t\t\t\t{build_id} /* {name} in {phase_name} */,\n" + text[m.end():]
         print("added", rel)
 
     open(pbx_path, "w", encoding="utf-8").write(text)

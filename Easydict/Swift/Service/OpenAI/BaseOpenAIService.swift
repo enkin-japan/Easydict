@@ -8,6 +8,7 @@
 
 import Alamofire
 import AsyncAlgorithms
+import Defaults
 import Foundation
 import OpenAI
 
@@ -42,6 +43,14 @@ public class BaseOpenAIService: StreamService {
 
     override var canFetchRemoteModels: Bool {
         true
+    }
+
+    /// `reasoning_effort` for services with a thinking switch. Sent only for models detected as
+    /// `.toggleable`; any other model keeps the provider default, exactly as without the switch.
+    @nonobjc
+    var thinkingReasoningEffort: ChatQuery.ReasoningEffort? {
+        guard supportsThinkingToggle, cachedThinkingCapability == .toggleable else { return nil }
+        return Defaults[enableThinkingKey] ? ChatQuery.ReasoningEffort.high : ChatQuery.ReasoningEffort.none
     }
 
     override func contentStreamTranslate(
@@ -235,7 +244,35 @@ public class BaseOpenAIService: StreamService {
 
     private let streamTaskControl = OpenAIStreamTaskControl()
 
+    /// Detects the thinking capability first when the switch applies but the current model has
+    /// not been probed yet, so the very first request already honours the switch.
     private func contentStream(
+        messages: [OpenAIChatMessage]
+    )
+        -> AsyncThrowingStream<String, any Error> {
+        guard supportsThinkingToggle, cachedThinkingCapability == nil else {
+            return makeContentStream(messages: messages)
+        }
+
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                _ = await self.thinkingCapability(refresh: false)
+                do {
+                    for try await content in self.makeContentStream(messages: messages) {
+                        continuation.yield(content)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in
+                task.cancel()
+            }
+        }
+    }
+
+    private func makeContentStream(
         messages: [OpenAIChatMessage]
     )
         -> AsyncThrowingStream<String, any Error> {

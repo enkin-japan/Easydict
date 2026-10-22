@@ -57,6 +57,7 @@ enum ServiceConfigurationKey: String {
     case thinkTag
     case temperature
     case enableStreaming
+    case enableThinking
     case reasoningEffort = "ReasoningEffort"
     // Effort level for agent CLI services (e.g. claude --effort). Distinct from
     // `reasoningEffort`, whose storage slot the StreamService base class already

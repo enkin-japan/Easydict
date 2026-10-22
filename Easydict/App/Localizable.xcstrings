@@ -10859,6 +10859,206 @@
         }
       }
     },
+    "service.configuration.thinking.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thinking"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Razonamiento"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "思考モード"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uvažovanie"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "思考模式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "思考模式"
+          }
+        }
+      }
+    },
+    "service.configuration.thinking.footnote.checking" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking whether the current model can turn thinking on and off…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobando si el modelo actual puede activar y desactivar el razonamiento…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のモデルが思考のオン/オフに対応しているか確認しています…"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overuje sa, či aktuálny model dokáže zapnúť a vypnúť uvažovanie…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在检测当前模型是否支持开关思考…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在檢測目前模型是否支援開關思考…"
+          }
+        }
+      }
+    },
+    "service.configuration.thinking.footnote.toggleable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The current model supports turning thinking on and off. With thinking off, answers start much sooner."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo actual permite activar y desactivar el razonamiento. Sin razonamiento, las respuestas empiezan mucho antes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のモデルは思考のオン/オフに対応しています。オフにすると応答がかなり早く始まります。"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuálny model podporuje zapnutie a vypnutie uvažovania. Bez uvažovania odpovede začnú oveľa skôr."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前模型支持开关思考。关闭后不再先思考，响应会快很多。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前模型支援開關思考。關閉後不再先思考，回應會快很多。"
+          }
+        }
+      }
+    },
+    "service.configuration.thinking.footnote.unsupported" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The current model cannot turn thinking on and off, so requests keep the model's default behavior."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El modelo actual no puede activar ni desactivar el razonamiento, así que las solicitudes mantienen el comportamiento predeterminado del modelo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のモデルは思考のオン/オフに対応していないため、モデルの既定の動作のままリクエストします。"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuálny model nedokáže zapnúť a vypnúť uvažovanie, preto požiadavky ponechávajú predvolené správanie modelu."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前模型不支持开关思考，请求保持模型的默认行为。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前模型不支援開關思考，請求維持模型的預設行為。"
+          }
+        }
+      }
+    },
+    "service.configuration.thinking.footnote.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not determine whether the current model can turn thinking on and off, so requests keep the server's default behavior."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo determinar si el modelo actual puede activar y desactivar el razonamiento, así que las solicitudes mantienen el comportamiento predeterminado del servidor."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のモデルが思考のオン/オフに対応しているか判断できないため、サーバーの既定の動作のままリクエストします。"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nepodarilo sa zistiť, či aktuálny model dokáže zapnúť a vypnúť uvažovanie, preto požiadavky ponechávajú predvolené správanie servera."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法确认当前模型是否支持开关思考，请求保持服务端的默认行为。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法確認目前模型是否支援開關思考，請求維持伺服器的預設行為。"
+          }
+        }
+      }
+    },
     "service.configuration.service_identifier.title" : {
       "localizations" : {
         "en" : {

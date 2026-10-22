@@ -20,6 +20,15 @@
 **新增**
 - **注音服务**（默认启用，完全离线）：日语显示振り仮名，中文显示带声调拼音；
   “在这个词里的读音 ≠ 单字默认读音”的多音字会高亮并列出。
+  - 中文：按打包的词组拼音词典（phrase-pinyin-data，约 41 万词）做双向最大匹配，再按词取读音，
+    查不到的字用 pinyin-data 的常用读音；只差轻声的不算多音字。
+  - 日语：系统分词器给出读音，再用打包的 JmdictFurigana（JMdict 派生，约 23 万词）逐字对齐假名，
+    纠正被切开读错的词（二日 → ふつか）和长音 おう/おお（大きい、通り）。
+  - 词典压缩后约 6.6 MB，首次注音时载入（约 0.03 秒），常驻内存约 25 MB；数据许可见
+    `Easydict/Swift/Service/Reading/Resources/ReadingDataLicenses.txt`。
+- **思考开关**（Ollama / 自定义 OpenAI 服务设置）：通过 Ollama 的 `/api/show` 检测当前模型，只有明确支持
+  开关思考时才可操作，默认关闭（请求带 `reasoning_effort: none`，打开时为 `high`）；明确不支持或无法判断时
+  开关置灰，请求保持原来的服务端默认。自定义 OpenAI 只对本机和局域网地址检测，不会向云端服务发额外请求。
 - **右键 → 服务**（零权限）：
   - `Easydict 查询`：用选中文字打开查询窗口
   - `Easydict 翻译并替换`：用第一个启用的 Ollama / 自定义 OpenAI 服务翻译，直接替换选中文字（写邮件回复时用）
@@ -92,7 +101,7 @@ open Easydict.xcworkspace        # 在仓库根目录执行，注意是 .xcworks
 4. 如果只输入一个词，按词典格式输出：读音、词性、释义、2 个例句。
 ```
 
-“注音”服务给出的是系统词库的确定性读音，大模型负责翻译和解释，两者可以互相对照。
+“注音”服务给出的是词典的确定性读音，大模型负责翻译和解释，两者可以互相对照。
 
 **注意**：“翻译并替换”用的是服务列表里**第一个**启用的 AI 服务，它的输出会原样写回你的文本框。
 建议建两个自定义 OpenAI 实例（指向同一个本地 API）：排在前面的那个不填自定义提示词，只做纯翻译；
@@ -101,4 +110,5 @@ open Easydict.xcworkspace        # 在仓库根目录执行，注意是 .xcworks
 ## 工具脚本
 
 - `scripts/pbx_remove.py`：从 `project.pbxproj` 中删除文件/目录或 Swift Package
-- `scripts/pbx_add.py`：把新的 Swift 文件加入 target
+- `scripts/pbx_add.py`：把新的 Swift 文件（Sources）或资源文件（Resources）加入 target
+- `scripts/reading-dict/update.sh`：按固定版本下载词典源数据，重新生成注音词典资源

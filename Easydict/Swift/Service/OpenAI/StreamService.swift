@@ -439,9 +439,33 @@ public class StreamService: QueryService {
         Defaults[reasoningEffortDefaultsKey]
     }
 
+    /// Whether this service shows the thinking switch. The switch only takes effect for
+    /// models detected as `.toggleable`; otherwise requests keep the provider default.
+    var supportsThinkingToggle: Bool {
+        false
+    }
+
+    /// Storage key for the thinking switch. Off by default: thinking adds seconds of
+    /// latency before the first translated character.
+    var enableThinkingKey: Defaults.Key<Bool> {
+        boolDefaultsKey(.enableThinking, defaultValue: false)
+    }
+
+    /// The last detected thinking capability of the current endpoint and model, or nil if
+    /// it has not been detected yet.
+    var cachedThinkingCapability: ThinkingCapability? {
+        nil
+    }
+
     /// Optional guidance displayed below the locally available model choices.
     @MainActor
     var modelSelectionHint: String? { nil }
+
+    /// Detects whether the current model can switch thinking on and off.
+    /// - Parameter refresh: Ignore cached results, e.g. when the settings view appears.
+    func thinkingCapability(refresh _: Bool) async -> ThinkingCapability {
+        .unknown
+    }
 
     @MainActor
     func modelSelectionTitle(for identifier: String) -> String { identifier }

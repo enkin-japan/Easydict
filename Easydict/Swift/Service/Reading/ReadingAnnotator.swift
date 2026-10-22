@@ -2,9 +2,11 @@
 //  ReadingAnnotator.swift
 //  Easydict
 //
-//  Slim build: offline reading annotation using the system's own linguistic data.
-//  - Japanese: CFStringTokenizer word segmentation + per-word reading → furigana.
-//  - Mandarin: ICU Han→Latin transform per word (phrase-aware) → pinyin with tones.
+//  Slim build: offline reading annotation.
+//  - Japanese: CFStringTokenizer word segmentation + per-word reading, checked and aligned
+//    per kanji with the bundled JmdictFurigana data → furigana.
+//  - Mandarin: forward maximum matching over the bundled phrase pinyin dictionary, falling
+//    back to per-character default readings → pinyin with tones.
 //  Nothing here touches the network.
 //
 
@@ -33,27 +35,51 @@ enum ReadingAnnotator {
 
     /// Splits Japanese text into segments, attaching hiragana readings to words that contain kanji.
     static func japanese(_ text: String) -> [RubySegment] {
-        tokenize(text, localeIdentifier: "ja").flatMap { token -> [RubySegment] in
-            guard token.isWord, containsKanji(token.surface),
-                  let latin = token.latinTranscription,
-                  let reading = hiragana(fromRomaji: latin)
-            else {
+        let dictionary = JapaneseFuriganaDictionary.shared
+        let tokens = mergingSplitKanjiWords(tokenize(text, localeIdentifier: "ja"), dictionary: dictionary)
+        return tokens.flatMap { token -> [RubySegment] in
+            guard token.isWord, containsKanji(token.surface), let reading = token.reading else {
                 return [RubySegment(base: token.surface, reading: nil)]
             }
-            return splitOkurigana(surface: token.surface, reading: reading)
+            return furiganaSegments(surface: token.surface, reading: reading, dictionary: dictionary)
         }
     }
 
     // MARK: Mandarin
 
-    /// Splits Chinese text into segments with tone-marked pinyin per character.
+    /// Splits Chinese text into segments with tone-marked pinyin per character, reading
+    /// polyphonic characters by the dictionary phrase they belong to.
     static func mandarin(_ text: String) -> [RubySegment] {
-        tokenize(text, localeIdentifier: "zh-Hans").flatMap { token -> [RubySegment] in
-            guard token.isWord, containsHan(token.surface) else {
-                return [RubySegment(base: token.surface, reading: nil)]
+        let dictionary = ChinesePinyinDictionary.shared
+        let characters = Array(text)
+        var segments: [RubySegment] = []
+        var index = 0
+
+        while index < characters.count {
+            var runEnd = index
+            let isHanRun = isHan(characters[index])
+            while runEnd < characters.count, isHan(characters[runEnd]) == isHanRun {
+                runEnd += 1
             }
-            return pinyinSegments(forWord: token.surface)
+            let run = Array(characters[index ..< runEnd])
+            index = runEnd
+
+            guard isHanRun else {
+                segments.append(RubySegment(base: String(run), reading: nil))
+                continue
+            }
+            for word in segmentHanRun(run, dictionary: dictionary) {
+                if let syllables = word.syllables {
+                    for (character, syllable) in zip(word.characters, syllables) {
+                        segments.append(mandarinSegment(character, reading: syllable, dictionary: dictionary))
+                    }
+                } else if let character = word.characters.first {
+                    let reading = dictionary.defaultReading(of: character) ?? pinyin(String(character))
+                    segments.append(RubySegment(base: String(character), reading: reading))
+                }
+            }
         }
+        return segments
     }
 
     // MARK: Character classes
@@ -75,8 +101,18 @@ enum ReadingAnnotator {
     private struct Token {
         let surface: String
         let isWord: Bool
-        let latinTranscription: String?
+        /// Hiragana reading derived from the tokenizer's Latin transcription.
+        let reading: String?
     }
+
+    /// A dictionary phrase with its syllables, or a single character (`syllables == nil`).
+    private struct HanWord {
+        let characters: ArraySlice<Character>
+        let syllables: [String]?
+    }
+
+    /// Tokens of at most this many characters are short enough to be fragments of one word.
+    private static let maxMergedWordLength = 4
 
     /// Tokenizes `text`, returning every word token plus the gaps between them,
     /// so that concatenating all surfaces reproduces the input exactly.
@@ -89,7 +125,7 @@ enum ReadingAnnotator {
         guard let tokenizer = CFStringTokenizerCreate(
             kCFAllocatorDefault, cfText, fullRange, kCFStringTokenizerUnitWordBoundary, locale
         ) else {
-            return [Token(surface: text, isWord: false, latinTranscription: nil)]
+            return [Token(surface: text, isWord: false, reading: nil)]
         }
 
         var tokens: [Token] = []
@@ -99,22 +135,83 @@ enum ReadingAnnotator {
             let range = CFStringTokenizerGetCurrentTokenRange(tokenizer)
             if range.location > cursor {
                 let gap = nsText.substring(with: NSRange(location: cursor, length: range.location - cursor))
-                tokens.append(Token(surface: gap, isWord: false, latinTranscription: nil))
+                tokens.append(Token(surface: gap, isWord: false, reading: nil))
             }
             let surface = nsText.substring(with: NSRange(location: range.location, length: range.length))
             let attribute = CFStringTokenizerCopyCurrentTokenAttribute(
                 tokenizer, kCFStringTokenizerAttributeLatinTranscription
             )
             let latin = (attribute as? NSString) as String?
-            tokens.append(Token(surface: surface, isWord: true, latinTranscription: latin))
+            tokens.append(Token(surface: surface, isWord: true, reading: latin.flatMap(hiragana(fromRomaji:))))
             cursor = range.location + range.length
             tokenType = CFStringTokenizerAdvanceToNextToken(tokenizer)
         }
         if cursor < nsText.length {
             let tail = nsText.substring(from: cursor)
-            tokens.append(Token(surface: tail, isWord: false, latinTranscription: nil))
+            tokens.append(Token(surface: tail, isWord: false, reading: nil))
         }
         return tokens
+    }
+
+    /// Re-joins adjacent pure-kanji tokens that the tokenizer split inside one dictionary word,
+    /// e.g. 二|日 read ふた|か → 二日 ふつか. The split readings are kept when they already form
+    /// one of the word's dictionary readings; otherwise the most common dictionary reading wins.
+    private static func mergingSplitKanjiWords(
+        _ tokens: [Token],
+        dictionary: JapaneseFuriganaDictionary
+    )
+        -> [Token] {
+        func isKanjiFragment(_ token: Token) -> Bool {
+            token.isWord && token.surface.count <= maxMergedWordLength
+                && token.surface.unicodeScalars.allSatisfy(isHan)
+        }
+
+        var merged: [Token] = []
+        var index = 0
+        while index < tokens.count {
+            var combined: Token?
+            if isKanjiFragment(tokens[index]) {
+                var runEnd = index
+                while runEnd < tokens.count, isKanjiFragment(tokens[runEnd]) {
+                    runEnd += 1
+                }
+                for end in stride(from: runEnd, through: index + 2, by: -1) {
+                    let run = tokens[index ..< end]
+                    let surface = run.map(\.surface).joined()
+                    guard surface.count <= maxMergedWordLength,
+                          let fallback = dictionary.entries(for: surface).first
+                    else { continue }
+                    let splitReading = run.compactMap(\.reading).joined()
+                    let reading = dictionary.entry(for: surface, reading: splitReading)?.reading ?? fallback.reading
+                    combined = Token(surface: surface, isWord: true, reading: reading)
+                    index = end
+                    break
+                }
+            }
+            if let combined {
+                merged.append(combined)
+            } else {
+                merged.append(tokens[index])
+                index += 1
+            }
+        }
+        return merged
+    }
+
+    /// Furigana for one word: dictionary alignment per kanji when the word's reading is known,
+    /// otherwise the okurigana heuristic. A reading the dictionary does not list for an exact
+    /// headword is replaced by the dictionary's most common reading.
+    private static func furiganaSegments(
+        surface: String,
+        reading: String,
+        dictionary: JapaneseFuriganaDictionary
+    )
+        -> [RubySegment] {
+        let entry = dictionary.entry(for: surface, reading: reading) ?? dictionary.entries(for: surface).first
+        if let entry, let segments = entry.segments(for: surface) {
+            return segments
+        }
+        return splitOkurigana(surface: surface, reading: entry?.reading ?? reading)
     }
 
     private static func isHan(_ scalar: Unicode.Scalar) -> Bool {
@@ -124,6 +221,10 @@ enum ReadingAnnotator {
         default:
             false
         }
+    }
+
+    private static func isHan(_ character: Character) -> Bool {
+        character.unicodeScalars.first.map(isHan) ?? false
     }
 
     /// Converts the tokenizer's romaji to hiragana. Returns nil if the result still contains Latin letters.
@@ -201,30 +302,76 @@ enum ReadingAnnotator {
         return segments
     }
 
-    /// Tone-marked pinyin for a Chinese word, split per character when syllables line up.
-    private static func pinyinSegments(forWord word: String) -> [RubySegment] {
-        guard let wordPinyin = pinyin(word) else {
-            return [RubySegment(base: word, reading: nil)]
+    /// Bidirectional maximum matching: segments the run forwards and backwards and keeps the
+    /// result with fewer words, then fewer single characters, preferring the backward pass on
+    /// a tie (会长期 → 会|长期 rather than 会长|期).
+    private static func segmentHanRun(_ run: [Character], dictionary: ChinesePinyinDictionary) -> [HanWord] {
+        func phrase(_ range: Range<Int>) -> HanWord? {
+            guard range.count >= 2,
+                  let syllables = dictionary.syllables(forPhrase: String(run[range])),
+                  syllables.count == range.count
+            else { return nil }
+            return HanWord(characters: run[range], syllables: syllables)
+        }
+        func single(_ index: Int) -> HanWord {
+            HanWord(characters: run[index ... index], syllables: nil)
         }
 
-        let characters = Array(word)
-        let syllables = wordPinyin.split(whereSeparator: \.isWhitespace).map(String.init)
-        let hanCount = characters.filter { containsHan(String($0)) }.count
-
-        guard hanCount == characters.count, syllables.count == characters.count else {
-            // Mixed content or unexpected syllabification: annotate the whole word.
-            return [RubySegment(base: word, reading: wordPinyin)]
+        var forward: [HanWord] = []
+        var start = 0
+        while start < run.count {
+            let longest = min(dictionary.maxPhraseLength, run.count - start)
+            let word = stride(from: longest, through: 2, by: -1).lazy
+                .compactMap { phrase(start ..< start + $0) }.first ?? single(start)
+            forward.append(word)
+            start += word.characters.count
         }
 
-        return zip(characters, syllables).map { character, syllable in
-            var segment = RubySegment(base: String(character), reading: syllable)
-            if characters.count > 1, let standalone = pinyin(String(character)),
-               standalone.lowercased() != syllable.lowercased() {
-                segment.isContextReading = true
-                segment.defaultReading = standalone
-            }
-            return segment
+        var backward: [HanWord] = []
+        var end = run.count
+        while end > 0 {
+            let longest = min(dictionary.maxPhraseLength, end)
+            let word = stride(from: longest, through: 2, by: -1).lazy
+                .compactMap { phrase(end - $0 ..< end) }.first ?? single(end - 1)
+            backward.insert(word, at: 0)
+            end -= word.characters.count
         }
+
+        func singles(_ words: [HanWord]) -> Int {
+            words.filter { $0.characters.count == 1 }.count
+        }
+        if forward.count != backward.count {
+            return forward.count < backward.count ? forward : backward
+        }
+        return singles(forward) < singles(backward) ? forward : backward
+    }
+
+    /// One character of a dictionary phrase. It is marked as a context reading when the phrase
+    /// reads it differently from its default reading, except for a mere neutral tone
+    /// (桌子 zi, 东西 xi), which would flag almost every compound.
+    private static func mandarinSegment(
+        _ character: Character,
+        reading: String,
+        dictionary: ChinesePinyinDictionary
+    )
+        -> RubySegment {
+        var segment = RubySegment(base: String(character), reading: reading)
+        guard let standalone = dictionary.defaultReading(of: character) ?? pinyin(String(character)),
+              standalone.lowercased() != reading.lowercased()
+        else { return segment }
+
+        let isNeutralToneOnly = !hasToneMark(reading)
+            && standalone.folding(options: .diacriticInsensitive, locale: nil)
+            == reading.folding(options: .diacriticInsensitive, locale: nil)
+        if !isNeutralToneOnly {
+            segment.isContextReading = true
+            segment.defaultReading = standalone
+        }
+        return segment
+    }
+
+    private static func hasToneMark(_ syllable: String) -> Bool {
+        syllable.contains { "āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜńňǹḿ".contains($0) }
     }
 
     private static func pinyin(_ text: String) -> String? {

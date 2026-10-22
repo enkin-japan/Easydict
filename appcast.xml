@@ -3,18 +3,18 @@
     <channel>
         <title>Easydict Slim</title>
         <item>
-            <title>2.25.0 (69)</title>
-            <pubDate>Wed, 21 Oct 2026 21:53:29 +0900</pubDate>
-            <description>&lt;h2&gt;Easydict Slim 2.25.0 (69)&lt;/h2&gt;
+            <title>2.25.0 (70)</title>
+            <pubDate>Thu, 22 Oct 2026 14:07:26 +0900</pubDate>
+            <description>&lt;h2&gt;Easydict Slim 2.25.0 (70)&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;加入 Sparkle 自动更新，菜单栏菜单和 App 菜单新增“检查更新”。&lt;/li&gt;
-&lt;li&gt;使用 Developer ID 签名并经过 Apple 公证。&lt;/li&gt;
+&lt;li&gt;注音内置中文词组拼音词典与日语 JMdict 假名数据：多音字按词读对并高亮，假名逐字对齐。&lt;/li&gt;
+&lt;li&gt;Ollama / 自定义 OpenAI 新增思考开关：仅在模型明确支持时可操作，默认关闭以加快响应。&lt;/li&gt;
 &lt;/ul&gt;</description>
-            <sparkle:version>69</sparkle:version>
+            <sparkle:version>70</sparkle:version>
             <sparkle:shortVersionString>2.25.0</sparkle:shortVersionString>
-            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.3</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.4</sparkle:fullReleaseNotesLink>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.3/Easydict.zip" length="18744090" type="application/octet-stream" sparkle:edSignature="GA1rsQJB05F99KAnZ96yJuLdQglbWmj61g46TwjFtDxUXljEiNrMNJJUSUYflLX6FGO743adB5Z0+98VQmOfBg=="/>
+            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.4/Easydict.zip" length="25428509" type="application/octet-stream" sparkle:edSignature="nQPiIhqSEk1wdespooYR1eaw5yuNvJTMNFm9QExftww2deWeHI8re5gN/yijR13ZTeS6MEfrLQn5hPLlUVS0CQ=="/>
         </item>
     </channel>
 </rss>

@@ -160,6 +160,10 @@ struct StreamConfigurationView: View {
                 )
             }
 
+            if service.supportsThinkingToggle {
+                ThinkingToggleCell(service: service)
+            }
+
             if showCustomPromptSection {
                 ToggleCell(
                     titleKey: "service.configuration.openai.enable_custom_prompt.title",

@@ -9,6 +9,7 @@
 import Alamofire
 import Defaults
 import Foundation
+import OpenAI
 
 // MARK: - OllamaService
 
@@ -52,6 +53,23 @@ class OllamaService: BaseOpenAIService {
 
     override var observeKeys: [Defaults.Key<String>] {
         [supportedModelsKey]
+    }
+
+    override var supportsThinkingToggle: Bool {
+        true
+    }
+
+    override var cachedThinkingCapability: ThinkingCapability? {
+        OllamaThinkingProbe.cachedCapability(endpoint: endpoint, model: model)
+    }
+
+    @nonobjc
+    override var reasoningEffort: ChatQuery.ReasoningEffort? {
+        thinkingReasoningEffort
+    }
+
+    override func thinkingCapability(refresh: Bool) async -> ThinkingCapability {
+        await OllamaThinkingProbe.capability(endpoint: endpoint, model: model, localOnly: false, refresh: refresh)
     }
 
     override func apiKeyRequirement() -> ServiceAPIKeyRequirement {

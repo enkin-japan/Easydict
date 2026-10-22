@@ -589,6 +589,15 @@
 		CF27B36688517468A0A78C89 /* SystemServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC84E0AB658642F1191D9AF3 /* SystemServiceProvider.swift */; };
 		8AE13A89E5607F1786E8FBEC /* ReadingAnnotator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A2C4C7983CD59F79C58BB0 /* ReadingAnnotator.swift */; };
 		F083D3AFEF58E4BEC7B3BF34 /* ReadingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6D04A75C227AC2DFDB02FA /* ReadingService.swift */; };
+		813C55BD9070A6575F32CA9A /* ChinesePinyinDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 311E730FA7C68E30F9B46228 /* ChinesePinyinDictionary.swift */; };
+		CD5654567DB0F5E306D8D9C0 /* JapaneseFuriganaDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EB23CF876666BCC7AFF575 /* JapaneseFuriganaDictionary.swift */; };
+		4CAC5F30BFE2C0B84A109630 /* zh-phrases.tsv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 77066AD086241192A8BE4D34 /* zh-phrases.tsv.lzfse */; };
+		DE2C0D1D9D64D04086C76CE1 /* zh-characters.tsv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 68078CCEC442E362248240EA /* zh-characters.tsv.lzfse */; };
+		A655F7151C2EE1157E3072D9 /* ja-furigana.tsv.lzfse in Resources */ = {isa = PBXBuildFile; fileRef = 25A365AC1EF60A3FDC6E021D /* ja-furigana.tsv.lzfse */; };
+		51CD551EA35B629E724A0274 /* ReadingDataLicenses.txt in Resources */ = {isa = PBXBuildFile; fileRef = E3D7CAD9C8DE0FBEBE5ECD9C /* ReadingDataLicenses.txt */; };
+		FF0E0D7E9B429977C8961D49 /* OllamaThinkingProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511760451DEDA7EDCD85457B /* OllamaThinkingProbe.swift */; };
+		415E7EC45CE75D3AB5095A6D /* ThinkingToggleCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4922029934AB617F9E6E4B8D /* ThinkingToggleCell.swift */; };
+		CF84913F137EEC3A67A53430 /* ReadingTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7EBADDF2FA77B6B1BDFF83D /* ReadingTable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1303,6 +1312,15 @@
 		FC84E0AB658642F1191D9AF3 /* SystemServiceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemServiceProvider.swift; sourceTree = "<group>"; };
 		75A2C4C7983CD59F79C58BB0 /* ReadingAnnotator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingAnnotator.swift; sourceTree = "<group>"; };
 		EC6D04A75C227AC2DFDB02FA /* ReadingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingService.swift; sourceTree = "<group>"; };
+		311E730FA7C68E30F9B46228 /* ChinesePinyinDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChinesePinyinDictionary.swift; sourceTree = "<group>"; };
+		F4EB23CF876666BCC7AFF575 /* JapaneseFuriganaDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JapaneseFuriganaDictionary.swift; sourceTree = "<group>"; };
+		77066AD086241192A8BE4D34 /* zh-phrases.tsv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = "zh-phrases.tsv.lzfse"; sourceTree = "<group>"; };
+		68078CCEC442E362248240EA /* zh-characters.tsv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = "zh-characters.tsv.lzfse"; sourceTree = "<group>"; };
+		25A365AC1EF60A3FDC6E021D /* ja-furigana.tsv.lzfse */ = {isa = PBXFileReference; lastKnownFileType = file; path = "ja-furigana.tsv.lzfse"; sourceTree = "<group>"; };
+		E3D7CAD9C8DE0FBEBE5ECD9C /* ReadingDataLicenses.txt */ = {isa = PBXFileReference; lastKnownFileType = file; path = ReadingDataLicenses.txt; sourceTree = "<group>"; };
+		511760451DEDA7EDCD85457B /* OllamaThinkingProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaThinkingProbe.swift; sourceTree = "<group>"; };
+		4922029934AB617F9E6E4B8D /* ThinkingToggleCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThinkingToggleCell.swift; sourceTree = "<group>"; };
+		A7EBADDF2FA77B6B1BDFF83D /* ReadingTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingTable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1993,6 +2011,7 @@
 			children = (
 				03792EA12C3831040074A145 /* OllamaService.swift */,
 				03CF5E632C39B2310058F9DB /* OllamaModel.swift */,
+				511760451DEDA7EDCD85457B /* OllamaThinkingProbe.swift */,
 			);
 			path = Ollama;
 			sourceTree = "<group>";
@@ -3557,6 +3576,7 @@
 				03F086F12DB1F5F000268DF0 /* SliderCell.swift */,
 				C0DEC11E0002000000000007 /* CodexCLIServiceConfigurationView.swift */,
 				6F6403A348529CBE1CFB24A1 /* CodexManagedAccountView.swift */,
+				4922029934AB617F9E6E4B8D /* ThinkingToggleCell.swift */,
 			);
 			path = ServiceConfigurationView;
 			sourceTree = "<group>";
@@ -3585,8 +3605,23 @@
 			children = (
 				75A2C4C7983CD59F79C58BB0 /* ReadingAnnotator.swift */,
 				EC6D04A75C227AC2DFDB02FA /* ReadingService.swift */,
+				311E730FA7C68E30F9B46228 /* ChinesePinyinDictionary.swift */,
+				F4EB23CF876666BCC7AFF575 /* JapaneseFuriganaDictionary.swift */,
+				EA335E259B2CE56619586881 /* Resources */,
+				A7EBADDF2FA77B6B1BDFF83D /* ReadingTable.swift */,
 			);
 			path = Reading;
+			sourceTree = "<group>";
+		};
+		EA335E259B2CE56619586881 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				77066AD086241192A8BE4D34 /* zh-phrases.tsv.lzfse */,
+				68078CCEC442E362248240EA /* zh-characters.tsv.lzfse */,
+				25A365AC1EF60A3FDC6E021D /* ja-furigana.tsv.lzfse */,
+				E3D7CAD9C8DE0FBEBE5ECD9C /* ReadingDataLicenses.txt */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3806,6 +3841,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51CD551EA35B629E724A0274 /* ReadingDataLicenses.txt in Resources */,
+				A655F7151C2EE1157E3072D9 /* ja-furigana.tsv.lzfse in Resources */,
+				DE2C0D1D9D64D04086C76CE1 /* zh-characters.tsv.lzfse in Resources */,
+				4CAC5F30BFE2C0B84A109630 /* zh-phrases.tsv.lzfse in Resources */,
 				CA9CF8A72D2E6D3C000C1860 /* 人的一生_v4.json in Resources */,
 				03BFBB802923A2FA00C48725 /* white-black-icon@2x.png in Resources */,
 				031DBD792AE01E130071CF85 /* easydict in Resources */,
@@ -4050,6 +4089,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF84913F137EEC3A67A53430 /* ReadingTable.swift in Sources */,
+				415E7EC45CE75D3AB5095A6D /* ThinkingToggleCell.swift in Sources */,
+				FF0E0D7E9B429977C8961D49 /* OllamaThinkingProbe.swift in Sources */,
+				CD5654567DB0F5E306D8D9C0 /* JapaneseFuriganaDictionary.swift in Sources */,
+				813C55BD9070A6575F32CA9A /* ChinesePinyinDictionary.swift in Sources */,
 				F083D3AFEF58E4BEC7B3BF34 /* ReadingService.swift in Sources */,
 				8AE13A89E5607F1786E8FBEC /* ReadingAnnotator.swift in Sources */,
 				CF27B36688517468A0A78C89 /* SystemServiceProvider.swift in Sources */,
@@ -4668,7 +4712,7 @@
 		"CODE_SIGN_STYLE" = "$CODE_SIGN_STYLE";
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 69;
+		"CURRENT_PROJECT_VERSION" = 70;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = dwarf;
 		"DEVELOPMENT_TEAM" = "$(DEVELOPMENT_TEAM)";
@@ -4716,7 +4760,7 @@
 		"CODE_SIGN_STYLE" = Manual;
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 69;
+		"CURRENT_PROJECT_VERSION" = 70;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 		"DEVELOPMENT_TEAM" = "";
