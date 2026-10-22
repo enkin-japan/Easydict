@@ -51,6 +51,10 @@ GitHub Release `v2.25.0-slim.4`（enkin-japan/Easydict）
   0.24 秒 / 0.57 秒完成；打开时为 `high` 且返回思考内容；首次请求前 `/api/show` 检测为 `toggleable`（10 ms）。
   关闭状态下的第一次请求耗时 29.7 秒，之后复现均在 1 秒内，原因未能确认（Ollama 日志未记录）。
 - `xcodebuild build`（Debug）通过且本次文件无 SwiftLint 警告；`git diff --check`、`bash -n`、`jq -e .` 通过。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；发布后从公开地址取回 appcast（build 70）
+  与 `Easydict.zip`，长度一致且 `sign_update --verify` 签名有效，DMG 的 SHA-256 与本地一致。
+- 本机：build 69 移入废纸篓后安装 build 70，Gatekeeper 通过；真实查询中注音词典正常载入、`gemma4:26b-mlx` 检测为
+  `toggleable`，无崩溃。测试产生的 Debug 版与发布中间产物移入废纸篓（未清空）。
 - 未运行 `xcodebuild test`；设置页的置灰效果未截图确认（终端无屏幕录制权限）。
 
 ### 受影响文件
