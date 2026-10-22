@@ -42,6 +42,9 @@ API 返回的音频完整（首次与重复合成的语音都从 0.32 秒开始�
 - 模型列表合并逻辑用独立脚本复现：`gemma4:e4b-mlx, gemma4:26b-mlx, gemma-4-26b-a4b-it-4bit` 在服务器只提供
   `gemma-4-26b-a4b-it-4bit` 时变为只剩它；保留模型的顺序不变，新勾选的追加在后。
 - Review：唤醒等待由 0.5 秒改为 0.8 秒（日语音频开头几乎没有静音），其余无 finding。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；Release `v2.25.0-slim.7` 附 DMG
+  （SHA-256 `269ff265…5bc6`）与 Sparkle 更新包（25490566 字节），appcast 指向 build 73。
+- 本机：build 72 移入废纸篓（未清空）后安装 build 73，`spctl` 通过并已启动。
 - 未运行：在设置界面点击“获取模型列表”（无屏幕录制和辅助功能权限）；无法用耳朵确认开头不再被吞。
 
 ### 受影响文件
