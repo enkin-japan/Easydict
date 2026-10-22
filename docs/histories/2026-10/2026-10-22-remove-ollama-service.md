@@ -43,6 +43,10 @@ Ollama 服务原本不需要 Key，迁移后的自定义 OpenAI 也必须能无 
   - 首次真实查询报“缺少密钥”，据此把 API Key 改为可选；之后经记录代理转发到端口 8000 的真实翻译请求不带 `Authorization`，
     返回 200 并以 `data: [DONE]` 结束。`/api/show` 返回 404，思考开关保持置灰。
 - 测试结束后 Debug 偏好设置恢复为测试前的备份，代理已停止。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；Release `v2.25.0-slim.6` 附 DMG
+  （SHA-256 `12bcf9c3…3c68`）与 Sparkle 更新包（25478659 字节），appcast 指向 build 72。
+- 本机：build 71 移入废纸篓（未清空）后安装 build 72，首次启动日志记录迁移完成，三个窗口的服务列表变为
+  `CustomOpenAI#<uuid>`（地址 `http://localhost:8000/v1/chat/completions`），真实查询经自定义 OpenAI 完成且无错误。
 - 未运行：环境依赖的 `ServiceTests` 集成测试；“获取模型列表”按钮未在界面上点击确认（无屏幕录制权限）。
 
 ### 受影响文件
@@ -60,6 +64,7 @@ Ollama 服务原本不需要 Key，迁移后的自定义 OpenAI 也必须能无 
 - `Easydict/App/Localizable.xcstrings`
 - `Easydict.xcodeproj/project.pbxproj`
 - `SLIM.md`
+- `appcast.xml`
 
 ### 后续事项
 

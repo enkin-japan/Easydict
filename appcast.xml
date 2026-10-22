@@ -3,18 +3,18 @@
     <channel>
         <title>Easydict Slim</title>
         <item>
-            <title>2.25.0 (71)</title>
-            <pubDate>Thu, 22 Oct 2026 16:45:00 +0900</pubDate>
-            <description>&lt;h2&gt;Easydict Slim 2.25.0 (71)&lt;/h2&gt;
+            <title>2.25.0 (72)</title>
+            <pubDate>Thu, 22 Oct 2026 22:52:00 +0900</pubDate>
+            <description>&lt;h2&gt;Easydict Slim 2.25.0 (72)&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;服务列表重新可以添加 OpenAI（需自备 API Key）。&lt;/li&gt;
-&lt;li&gt;新增发音设置：可选系统声音（自动选最高品质，可按中日英指定）或本地 TTS（OpenAI 兼容 /v1/audio/speech，如 Kokoro-FastAPI），失败时自动改用系统声音。&lt;/li&gt;
+&lt;li&gt;移除 Ollama 服务，本机模型统一用“自定义 OpenAI”服务接入；原有 Ollama 服务会自动转换，设置保留。&lt;/li&gt;
+&lt;li&gt;自定义 OpenAI 的 API Key 可以留空，本机服务无需填写占位 Key。&lt;/li&gt;
 &lt;/ul&gt;</description>
-            <sparkle:version>71</sparkle:version>
+            <sparkle:version>72</sparkle:version>
             <sparkle:shortVersionString>2.25.0</sparkle:shortVersionString>
-            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.5</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.6</sparkle:fullReleaseNotesLink>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.5/Easydict.zip" length="25495610" type="application/octet-stream" sparkle:edSignature="AouSOJZ6mOvd0f4lDTyqWWYRFDxopuTJPJhrg5jXM+XUoUgGYFY9INV4nYKw9gVUU5n4blYsE3caykuUy6rGAQ=="/>
+            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.6/Easydict.zip" length="25478659" type="application/octet-stream" sparkle:edSignature="B8iZpE1BwH/3WGEe26BhfqVepns80ht2eWmTtiGRiXXSdhmiCfEGNrBFyOVwPUpfXCAyPn0jMAgGvoajFjq5CQ=="/>
         </item>
     </channel>
 </rss>
