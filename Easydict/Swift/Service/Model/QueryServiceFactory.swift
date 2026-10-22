@@ -118,9 +118,14 @@ final class QueryServiceFactory: NSObject {
         .init(.appleDictionary, AppleDictionary.self, "apple_dictionary", apiKeyRequirement: .none),
         .init(.mDict, MDictService.self, "service.mdict.name", apiKeyRequirement: .none),
         .init(.reading, ReadingService.self, "service.reading.name", apiKeyRequirement: .none),
-        .init(.ollama, OllamaService.self, "ollama_translate", apiKeyRequirement: .none),
         .init(.openAI, OpenAIService.self, "openai_translate"),
-        .init(.customOpenAI, CustomOpenAIService.self, "custom_openai", allowsMultipleInstances: true),
+        .init(
+            .customOpenAI,
+            CustomOpenAIService.self,
+            "custom_openai",
+            apiKeyRequirement: .none,
+            allowsMultipleInstances: true
+        ),
     ]
 
     /// Services that can be instantiated by type id (e.g. system TTS via `AppleService`)

@@ -306,9 +306,7 @@ struct StreamConfigurationView: View {
     }
 
     private var fetchModelsTitle: LocalizedStringKey {
-        service.serviceType() == .ollama
-            ? "service.configuration.fetch_models.local_title"
-            : "service.configuration.fetch_models.title"
+        "service.configuration.fetch_models.title"
     }
 
     private var existingModelIDs: [String] {

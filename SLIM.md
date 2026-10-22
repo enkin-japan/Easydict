@@ -13,11 +13,14 @@
 - 在线语种识别优化（Google/百度）、有道 OCR、有道/必应/谷歌在线发音
 
 **保留**
-- 查询服务：Apple 词典、MDict、Ollama、OpenAI 官方 API（需自备 API Key）、自定义 OpenAI 兼容 API（可多个实例）
+- 查询服务：Apple 词典、MDict、OpenAI 官方 API（需自备 API Key）、自定义 OpenAI 兼容 API（可多个实例，API Key 可留空，
+  本机 mlx-vlm / llama.cpp / Ollama 的 `/v1/chat/completions` 都用它接）
 - 划词翻译（需要辅助功能权限）、输入翻译、剪贴板翻译
 - 生词本、Anki 导出、图片 OCR（剪贴板里的图片，用系统 Vision 离线识别）
 
 **新增**
+- **Ollama 服务已移除**：旧版本里的 Ollama 服务在升级后第一次启动时自动转换成一个自定义 OpenAI 服务，
+  接口地址、模型、提示词等设置和各窗口的启用状态都保留；旧设置不删除，回退到旧版本仍可使用。
 - **注音服务**（默认启用，完全离线）：日语显示振り仮名，中文显示带声调拼音；
   “在这个词里的读音 ≠ 单字默认读音”的多音字会高亮并列出。
   - 中文：按打包的词组拼音词典（phrase-pinyin-data，约 41 万词）做双向最大匹配，再按词取读音，
@@ -26,7 +29,7 @@
     纠正被切开读错的词（二日 → ふつか）和长音 おう/おお（大きい、通り）。
   - 词典压缩后约 6.6 MB，首次注音时载入（约 0.03 秒），常驻内存约 25 MB；数据许可见
     `Easydict/Swift/Service/Reading/Resources/ReadingDataLicenses.txt`。
-- **思考开关**（Ollama / 自定义 OpenAI 服务设置）：通过 Ollama 的 `/api/show` 检测当前模型，只有明确支持
+- **思考开关**（自定义 OpenAI 服务设置）：通过 Ollama 格式的 `/api/show` 检测当前模型，只有明确支持
   开关思考时才可操作，默认关闭（请求带 `reasoning_effort: none`，打开时为 `high`）；明确不支持或无法判断时
   开关置灰，请求保持原来的服务端默认。自定义 OpenAI 只对本机和局域网地址检测，不会向云端服务发额外请求。
 - **发音**（设置 › 高级 › 发音）：引擎可选“系统声音”或“本地 TTS（OpenAI 兼容）”。
@@ -40,7 +43,7 @@
     试听失败会显示服务器返回的错误。
 - **右键 → 服务**（零权限）：
   - `Easydict 查询`：用选中文字打开查询窗口
-  - `Easydict 翻译并替换`：用第一个启用的 Ollama / 自定义 OpenAI 服务翻译，直接替换选中文字（写邮件回复时用）
+  - `Easydict 翻译并替换`：用第一个启用的自定义 OpenAI / OpenAI 服务翻译，直接替换选中文字（写邮件回复时用）
 - `⌥S` 默认改为“剪贴板翻译”：先用你自己的截图工具把截图复制到剪贴板，再按 `⌥S` 即可 OCR + 翻译。
 - Bundle ID 改为 `dev.enkin.EasydictSlim`，不会与官方版冲突，也不会被官方更新覆盖。
 - Release 用自己的 Developer ID（Team `9A84P4ZS84`）签名并公证：签名身份固定，更新后不用重新授予辅助功能权限，
@@ -100,7 +103,7 @@ open Easydict.xcworkspace        # 在仓库根目录执行，注意是 .xcworks
 - 系统设置 › 键盘 › 键盘快捷键 › 服务 › 文本，勾选它们（这里也可以绑定全局快捷键）；
 - 或在终端执行 `/System/Library/CoreServices/pbs -update` 后重新登录。
 
-## 推荐的大模型 Prompt（填在 自定义 OpenAI / Ollama 服务的自定义提示词里）
+## 推荐的大模型 Prompt（填在 自定义 OpenAI 服务的自定义提示词里）
 
 ```
 你是中日双语翻译兼语言老师。对用户给出的文本：

@@ -32,14 +32,14 @@ class ActionManager: NSObject {
         await executeTextReplacementAction(.translate)
     }
 
-    /// Translates `text` with the first enabled local / self-hosted AI service and returns the full result.
+    /// Translates `text` with the first enabled AI service and returns the full result.
     /// Used by the macOS Services menu ("Translate and Replace"), which needs the text synchronously.
     func translatedText(for text: String) async throws -> String {
         guard let request = await prepareTranslationRequest(queryText: text, type: .translate),
               let service = QueryServiceFactory.shared.service(withTypeId: request.serviceType)
               as? StreamService
         else {
-            throw QueryError(type: .api, message: "No enabled AI service (Ollama / Custom OpenAI)")
+            throw QueryError(type: .api, message: "No enabled AI service (Custom OpenAI / OpenAI)")
         }
 
         var result = ""
@@ -127,10 +127,10 @@ class ActionManager: NSObject {
             queryType: .translation
         )
 
-        // Slim build: use the first enabled local / self-hosted AI service
-        // (Ollama or Custom OpenAI) configured by the user.
+        // Slim build: use the first enabled AI service (Custom OpenAI or OpenAI)
+        // configured by the user.
         guard let service = Self.firstEnabledStreamService() else {
-            logError("No enabled AI service (Ollama / Custom OpenAI) for \(type), skipping")
+            logError("No enabled AI service (Custom OpenAI / OpenAI) for \(type), skipping")
             return nil
         }
         request.serviceType = service.serviceTypeWithUniqueIdentifier()

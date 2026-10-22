@@ -136,18 +136,17 @@ public class BaseOpenAIService: StreamService {
     }
 
     override func fetchRemoteModelIDs() async throws -> [String] {
-        guard !apiKey.trim().isEmpty else {
+        let apiKey = apiKey.trim()
+        if apiKeyRequirement().requiresKeyForRequest, apiKey.isEmpty {
             throw QueryError(type: .missingSecretKey, message: "API key is empty")
         }
 
-        let data = try await fetchRemoteModelData(
-            url: try remoteModelsURL(),
-            headers: [
-                .authorization(bearerToken: apiKey),
-                HTTPHeader(name: "api-key", value: apiKey),
-                .accept("application/json"),
-            ]
-        )
+        var headers: HTTPHeaders = [.accept("application/json")]
+        if !apiKey.isEmpty {
+            headers.add(.authorization(bearerToken: apiKey))
+            headers.add(name: "api-key", value: apiKey)
+        }
+        let data = try await fetchRemoteModelData(url: try remoteModelsURL(), headers: headers)
 
         guard let modelList = try? JSONDecoder().decode(OpenAIModelListResponse.self, from: data) else {
             throw QueryError(type: .api, message: "Invalid models response")

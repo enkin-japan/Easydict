@@ -419,7 +419,6 @@ final class LocalStorage: NSObject {
     private let defaultServiceTypeIDs: [String] = [
         ServiceType.reading.rawValue,
         ServiceType.appleDictionary.rawValue,
-        ServiceType.ollama.rawValue,
     ]
 
     /// Raw dictionary backing service query statistics.

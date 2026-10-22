@@ -25,11 +25,17 @@ class CustomOpenAIService: BaseOpenAIService {
         .customOpenAI
     }
 
+    /// Slim build: local servers usually need no key, so the key is optional and is only
+    /// sent when filled in; a server that needs one answers with its own auth error.
+    public override func apiKeyRequirement() -> ServiceAPIKeyRequirement {
+        .none
+    }
+
     // MARK: Internal
 
     override var supportsStreamingToggle: Bool { true }
 
-    /// The switch works when the custom endpoint is a local Ollama server; other servers
+    /// The switch works when the local server answers Ollama's `/api/show`; other servers
     /// cannot report thinking support, so their switch stays disabled.
     override var supportsThinkingToggle: Bool {
         true
