@@ -601,6 +601,7 @@
 		3FEA8B66BDE373F526D3F839 /* AdvancedTabSpeechSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6357FE4DB058611E4362B1EF /* AdvancedTabSpeechSection.swift */; };
 		BE399EC81A99E17AC5214774 /* OllamaThinkingProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2624717B13F88635E0107E2B /* OllamaThinkingProbe.swift */; };
 		2F43BB5B1AE3E17A20D1F544 /* OllamaServiceMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BF02F20AAFCF5CBACDB753 /* OllamaServiceMigration.swift */; };
+		D2BC8F7A34F49CC48E902F99 /* AudioOutputWarmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B634E462779B92EC4FF890D /* AudioOutputWarmer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1327,6 +1328,7 @@
 		6357FE4DB058611E4362B1EF /* AdvancedTabSpeechSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedTabSpeechSection.swift; sourceTree = "<group>"; };
 		2624717B13F88635E0107E2B /* OllamaThinkingProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaThinkingProbe.swift; sourceTree = "<group>"; };
 		71BF02F20AAFCF5CBACDB753 /* OllamaServiceMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaServiceMigration.swift; sourceTree = "<group>"; };
+		7B634E462779B92EC4FF890D /* AudioOutputWarmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioOutputWarmer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3629,6 +3631,7 @@
 				036EC3EFAA52954D06758CA5 /* SpeechEngine.swift */,
 				905CC1A1DFA02BAD1D1F4036 /* OpenAICompatibleTTSClient.swift */,
 				A250650154853AC41482EE9F /* SpeechPlayer.swift */,
+				7B634E462779B92EC4FF890D /* AudioOutputWarmer.swift */,
 			);
 			path = Speech;
 			sourceTree = "<group>";
@@ -4098,6 +4101,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2BC8F7A34F49CC48E902F99 /* AudioOutputWarmer.swift in Sources */,
 				2F43BB5B1AE3E17A20D1F544 /* OllamaServiceMigration.swift in Sources */,
 				BE399EC81A99E17AC5214774 /* OllamaThinkingProbe.swift in Sources */,
 				3FEA8B66BDE373F526D3F839 /* AdvancedTabSpeechSection.swift in Sources */,
@@ -4724,7 +4728,7 @@
 		"CODE_SIGN_STYLE" = "$CODE_SIGN_STYLE";
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 72;
+		"CURRENT_PROJECT_VERSION" = 73;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = dwarf;
 		"DEVELOPMENT_TEAM" = "$(DEVELOPMENT_TEAM)";
@@ -4772,7 +4776,7 @@
 		"CODE_SIGN_STYLE" = Manual;
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 72;
+		"CURRENT_PROJECT_VERSION" = 73;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 		"DEVELOPMENT_TEAM" = "";

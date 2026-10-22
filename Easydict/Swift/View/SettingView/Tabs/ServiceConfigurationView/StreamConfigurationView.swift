@@ -314,24 +314,16 @@ struct StreamConfigurationView: View {
         return service.validModels(from: storedModels)
     }
 
-    private func updateModels(remoteModelIDs: [String], selectedModelIDs: [String]) {
-        guard !remoteModelIDs.isEmpty else { return }
+    /// The fetched list replaces the old one: models the server no longer offers are dropped,
+    /// models kept keep their order, and newly selected ones are appended.
+    private func updateModels(selectedModelIDs: [String]) {
+        guard !selectedModelIDs.isEmpty else { return }
 
-        var models = service.validModels(from: Defaults[service.supportedModelsKey])
-        let remoteModels = Set(remoteModelIDs.map { service.remoteModelLookupID($0) })
         let selectedModels = Set(selectedModelIDs.map { service.remoteModelLookupID($0) })
-
-        models = models.filter {
+        var addedModels = Set<String>()
+        let models = (existingModelIDs + selectedModelIDs).filter {
             let modelID = service.remoteModelLookupID($0)
-            return !remoteModels.contains(modelID) || selectedModels.contains(modelID)
-        }
-
-        var existingModels = Set<String>()
-        models = models.filter {
-            existingModels.insert(service.remoteModelLookupID($0)).inserted
-        }
-        for modelID in selectedModelIDs where existingModels.insert(service.remoteModelLookupID(modelID)).inserted {
-            models.append(modelID)
+            return selectedModels.contains(modelID) && addedModels.insert(modelID).inserted
         }
         service.supportedModels = service.supportedModels(from: models)
     }
@@ -351,7 +343,7 @@ private struct RemoteModelsSheet: View {
     let modelLookupID: (String) -> String
     let modelGroupName: (String) -> String?
     let fetchModels: () async throws -> [String]
-    let onSave: ([String], [String]) -> ()
+    let onSave: ([String]) -> ()
 
     var body: some View {
         VStack(spacing: 12) {
@@ -373,11 +365,10 @@ private struct RemoteModelsSheet: View {
                     dismiss()
                 }
                 Button("ok") {
-                    let remoteModelIDs = models.map(\.id)
-                    let selectedModelIDs = remoteModelIDs.filter(selectedIDs.contains)
+                    let selectedModelIDs = models.map(\.id).filter(selectedIDs.contains)
                     dismiss()
                     Task { @MainActor in
-                        onSave(remoteModelIDs, selectedModelIDs)
+                        onSave(selectedModelIDs)
                     }
                 }
                 .disabled(!canSave)
@@ -419,7 +410,7 @@ private struct RemoteModelsSheet: View {
     }
 
     private var canSave: Bool {
-        !isLoading && errorMessage.isEmpty && !models.isEmpty
+        !isLoading && errorMessage.isEmpty && !selectedIDs.isEmpty
     }
 
     private var modelGroups: [String] {

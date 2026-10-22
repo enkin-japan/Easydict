@@ -123,6 +123,8 @@ final class SpeechPlayer: NSObject {
         let voice = Defaults[SpeechVoiceLanguage(language).ttsVoiceKey]
         let cacheKey = client.cacheKey(text: text, voice: voice) as NSString
         let generation = generation
+        let outputWarmer = AudioOutputWarmer.shared
+        outputWarmer.warmUp()
 
         synthesisTask = Task { [weak self] in
             do {
@@ -131,6 +133,11 @@ final class SpeechPlayer: NSObject {
                     audio = cached as Data
                 } else {
                     audio = try await client.synthesize(text, voice: voice)
+                }
+                // A device woken up by `warmUp()` would still drop the start of the audio.
+                let wakeUpTime = outputWarmer.remainingWakeUpTime
+                if wakeUpTime > 0 {
+                    try await Task.sleep(for: .seconds(wakeUpTime))
                 }
                 guard let self, generation == self.generation else { return }
 
@@ -167,6 +174,7 @@ final class SpeechPlayer: NSObject {
     }
 
     private func finish() {
+        AudioOutputWarmer.shared.scheduleStop()
         let completion = completion
         self.completion = nil
         completion?()
