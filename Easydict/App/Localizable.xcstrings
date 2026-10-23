@@ -12775,6 +12775,34 @@
         }
       }
     },
+    "service.builtin_dictionary.name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in Dictionary (Japanese / English)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内蔵辞書（日本語 / 英語）"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内置词典（日语 / 英语）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "內建詞典（日語 / 英語）"
+          }
+        }
+      }
+    },
     "service.configuration.api_key.placeholder %@" : {
       "localizations" : {
         "en" : {

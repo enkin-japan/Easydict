@@ -96,12 +96,18 @@ final class LocalStorage: NSObject {
 
         var serviceTypes = storedTypes.filter { registeredTypes.contains($0) }
         let missingTypes = registeredTypes.filter { !serviceTypes.contains($0) }
-        serviceTypes += missingTypes
         for typeId in missingTypes {
+            // A service added in an update takes its registration position in the list.
+            let position = registeredTypes.firstIndex(of: typeId) ?? serviceTypes.count
+            serviceTypes.insert(typeId, at: min(position, serviceTypes.count))
             let type = ServiceType(rawValue: typeId)
             if serviceInfo(withType: type, windowType: windowType) == nil {
                 setServiceInfo(
-                    QueryServiceConfiguration(type: type, enabled: false, windowType: windowType),
+                    QueryServiceConfiguration(
+                        type: type,
+                        enabled: enabledWhenAddedServiceTypeIDs.contains(typeId),
+                        windowType: windowType
+                    ),
                     windowType: windowType
                 )
             }
@@ -308,8 +314,15 @@ final class LocalStorage: NSObject {
 
     /// Services enabled in a window the first time it is set up.
     private let defaultEnabledServiceTypeIDs: [String] = [
+        ServiceType.builtinDictionary.rawValue,
         ServiceType.reading.rawValue,
         ServiceType.mDict.rawValue,
+    ]
+
+    /// Services enabled when an update adds them to an existing window list; others are
+    /// added disabled.
+    private let enabledWhenAddedServiceTypeIDs: [String] = [
+        ServiceType.builtinDictionary.rawValue,
     ]
 
     /// Raw dictionary backing service query statistics.

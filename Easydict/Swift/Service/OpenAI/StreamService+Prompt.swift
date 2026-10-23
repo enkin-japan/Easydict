@@ -15,6 +15,10 @@ extension StreamService {
     You are a translation expert proficient in various languages, focusing solely on translating text without interpretation. You accurately understand the meanings of proper nouns, idioms, metaphors, allusions, and other obscure words in sentences, translating them appropriately based on the context and language environment. The translation should be natural and fluent. Only return the translated text, without including redundant quotes or additional notes.
     """
 
+    static let sentenceSystemPrompt = """
+    You are a translation expert and language teacher. You translate sentences into natural, idiomatic text that conveys the intended meaning rather than mirroring the original wording, then explain the key vocabulary and grammar clearly and accurately.
+    """
+
     static let dictSystemPrompt = """
     You are a word search assistant skilled in multiple languages and knowledgeable in etymology. You can help search for words, phrases, slang, abbreviations, and other information. Prioritize queries from authoritative dictionary databases, such as the Oxford Dictionary, Cambridge Dictionary, and Wikipedia. If a word or abbreviation has multiple meanings, look up the most commonly used ones.
     """
@@ -175,13 +179,11 @@ extension StreamService {
         var prompt = ""
         var keyWords = "Key Words"
         var grammarParse = "Grammar Parsing"
-        var literalTranslation = "Literal Translation"
         var freeTranslation = "Free Translation"
 
         if EZLanguageManager.shared().isChineseLanguage(answerLanguage) {
             keyWords = "重点词汇"
             grammarParse = "语法分析"
-            literalTranslation = "直译"
             freeTranslation = "意译"
         }
 
@@ -192,9 +194,9 @@ extension StreamService {
             "Here is a \(sourceLanguageString) sentence: \"\"\"\(sentence)\"\"\".\n"
         prompt += sentencePrompt
 
-        let directTranslationPrompt =
-            "First, translate the sentence into \(targetLanguageString) literally, keeping the original format and including all information. Use the format: \"\(literalTranslation):\n{literal_translation}\".\n\n"
-        prompt += directTranslationPrompt
+        let freeTranslationPrompt =
+            "First, give a free translation into \(targetLanguageString): natural and idiomatic, faithful to the meaning rather than word-for-word, keeping the original format. Do not give a literal translation. If the sentence includes idioms, metaphors, historical references, or famous works, provide a detailed introduction after the translation. Use the format: \"\(freeTranslation):\n{free_translation}\".\n\n"
+        prompt += freeTranslationPrompt
 
         let stepByStepPrompt = "Then, follow these steps:\n"
         prompt += stepByStepPrompt
@@ -206,10 +208,6 @@ extension StreamService {
         let grammarParsePrompt =
             "2. Analyze the grammatical structure of the sentence. Use the format: \"\(grammarParse):\n{grammatical_analysis}\".\n\n"
         prompt += grammarParsePrompt
-
-        let freeTranslationPrompt =
-            "3. Identify any issues in the literal translation, such as non-standard \(targetLanguageString) expressions, awkwardness, or ambiguity. Provide a free translation that maintains the original meaning but is clearer and more natural in \(targetLanguageString). If the sentence includes idioms, metaphors, historical references, or famous works, provide a detailed introduction after the translation. Use the format: \"\(freeTranslation):\n{free_translation}\".\n\n"
-        prompt += freeTranslationPrompt
 
         let answerLanguagePrompt = "Answer in \(answerLanguage.rawValue).\n"
         prompt += answerLanguagePrompt
@@ -223,16 +221,15 @@ extension StreamService {
             chatMessagePair(
                 userContent: """
                 Here is an English sentence: \"\"\"But whether the incoming chancellor will offer dynamic leadership, rather than more of Germany’s recent drift, is hard to say.\"\"\"
-                First, provide the Simplified Chinese translation of this sentence.
+                First, give a free translation of this sentence into Simplified Chinese.
                 Then, follow these steps:
                 1. List the key vocabulary and phrases in the sentence. Include all parts of speech and meanings, and explain their specific meanings in this context.
                 2. Analyze the grammatical structure of the sentence.
-                3. Provide the inferred translation in Simplified Chinese.
                 Answer in Simplified Chinese.
                 """,
                 assistantContent: """
-                直译：
-                但是这位新任总理是否能够提供有活力的领导，而不是延续德国最近的漂泊，还很难说。
+                意译：
+                新任总理能否展现强有力的领导，而不是让德国继续近来随波逐流的状态，现在还很难说。
 
                 重点词汇：
                 incoming: adj. 正来临的；新任的。
@@ -243,17 +240,16 @@ extension StreamService {
 
                 语法分析：
                 该句子为一个复合句。主句为 "But...is hard to say."（但是这位新任总理是否能提供强力的领导还难以说），其中包含了一个 whether 引导的从句作宾语从句。
-
-                意译：
-                但是这位新任总理是否能够提供强力的领导，而不是继续德国最近的随波逐流之势，还很难说。
                 """
             ),
 
             chatMessagePair(
                 userContent: "The Sword of Damocles",
                 assistantContent: """
-                直译：
-                达摩克利斯之剑
+                意译：
+                达摩克利斯之剑（悬顶之剑）
+
+                （达摩克利斯之剑，又称为“悬顶之剑”，源自古希腊的一个寓言故事。这个短语经常被用来描述那些处于高位但随时可能遭遇不幸或灾难的人的处境。它提醒人们，权力和成功往往伴随着风险和挑战。）
 
                 重点词汇：
                 Sword: n. 剑。
@@ -261,19 +257,16 @@ extension StreamService {
 
                 语法分析：
                 这是一个简单名词短语。
-
-                意译：
-                达摩克利斯之剑
-
-                （达摩克利斯之剑，又称为“悬顶之剑”，源自古希腊的一个寓言故事。这个短语经常被用来描述那些处于高位但随时可能遭遇不幸或灾难的人的处境。它提醒人们，权力和成功往往伴随着风险和挑战。）
                 """
             ),
 
             chatMessagePair(
                 userContent: "better late than never",
                 assistantContent: """
-                直译：
-                迟到总比不到好
+                意译：
+                迟做总比不做好
+
+                （这是一句广为人知的英语谚语，传达了一个乐观且鼓励的态度，即在面对任务、决定或目标时，即使开始得较晚或者错过了最初的机会，采取行动并最终完成仍然比完全放弃要好。它强调了坚持与努力的价值，即便成果来得晚些，也不失为一种成功。）
 
                 重点词汇：
                 better: adj. 较好的；更好的。
@@ -282,19 +275,14 @@ extension StreamService {
 
                 语法分析：
                 这是一个固定短语。
-
-                意译：
-                迟做总比不做好
-
-                （这是一句广为人知的英语谚语，传达了一个乐观且鼓励的态度，即在面对任务、决定或目标时，即使开始得较晚或者错过了最初的机会，采取行动并最终完成仍然比完全放弃要好。它强调了坚持与努力的价值，即便成果来得晚些，也不失为一种成功。）
                 """
             ),
 
             chatMessagePair(
                 userContent: "Ukraine may get another Patriot battery.",
                 assistantContent: """
-                直译：
-                乌克兰可能会获得另一套爱国者导弹系统。
+                意译：
+                乌克兰可能会再获得一套爱国者导弹系统。
 
                 重点词汇：
                 Ukraine: n. 乌克兰，一个东欧的共和制国家。
@@ -303,9 +291,6 @@ extension StreamService {
 
                 语法分析：
                 该句为简单句。主语为 "Ukraine"，谓语为 "may get"，宾语为 "another Patriot battery"。
-
-                意译：
-                乌克兰可能会获得另一套爱国者导弹系统。
                 """
             ),
         ].flatMap { $0 }
@@ -315,7 +300,7 @@ extension StreamService {
                 userContent: """
                 Here is an English sentence: \"\"\"But whether the incoming chancellor will offer dynamic leadership, rather than more of Germany’s recent drift, is hard to say.\"\"\"
 
-                First, translate the sentence into English literally, keeping the original format and including all information. Use the following format: \"Literal Translation:\n{literal_translation_result}\".
+                First, give a free translation into English: natural and idiomatic, faithful to the meaning rather than word-for-word, keeping the original format. Do not give a literal translation. Use the format: \"Free Translation:\n{free_translation_result}\".
 
                 Then, follow these steps:
 
@@ -323,13 +308,11 @@ extension StreamService {
 
                 2. Analyze the grammatical structure of the sentence. Use the format: \"Grammar Parsing:\n{grammatical_analysis}\".
 
-                3. Provide a free translation of the sentence, ensuring it retains the original meaning but is easier to understand and more natural in English. Keep the original format unchanged. Use the format: \"Free Translation:\n{free_translation_result}\".
-
                 Answer in English.
                 """,
                 assistantContent: """
-                Literal Translation:
-                But whether the incoming chancellor will offer dynamic leadership, rather than more of Germany’s recent drift, is difficult to say.
+                Free Translation:
+                It's hard to say whether the incoming chancellor will offer dynamic leadership, or just prolong Germany's recent drift.
 
                 Key Words:
                 chancellor: n. Chancellor; minister. Here it refers to the German chancellor.
@@ -338,16 +321,13 @@ extension StreamService {
 
                 Grammar Parsing:
                 The sentence is a complex sentence. The main clause is "But .... is hard to say" (But it is hard to say whether the new prime minister can provide strong leadership), which contains a whether clause as the object clause.
-
-                Free Translation:
-                It's hard to say whether the incoming chancellor will offer dynamic leadership, or just prolong Germany's recent drift.
                 """
             ),
         ].flatMap { $0 }
 
         var messages: [ChatMessage] =
             enableSystemPrompt
-                ? [ChatMessage(role: .system, content: StreamService.translationSystemPrompt)] : []
+                ? [ChatMessage(role: .system, content: StreamService.sentenceSystemPrompt)] : []
 
         if EZLanguageManager.shared().isChineseLanguage(answerLanguage) {
             messages += chineseFewShot
@@ -359,6 +339,36 @@ extension StreamService {
         messages.append(userMessage)
 
         return messages
+    }
+
+    /// JMdict facts for a Japanese word, so the model's reading, accent and meanings agree
+    /// with the dictionary. The English glosses are to be translated, not copied.
+    private func japaneseDictionaryReference(_ word: String) -> String {
+        let matches = BuiltinDictionary.japaneseMatches(word).prefix(2)
+        let lines = matches.map { match -> String in
+            let entry = match.entry
+            let writing = entry.visibleWritings.first?.text
+            let reading = entry.visibleReadings.first { $0.applies(to: writing) } ?? entry.visibleReadings.first
+            var line = writing.map { "\($0)【\(reading?.text ?? "")】" } ?? reading?.text ?? word
+            if let accent = reading?.accent {
+                line += " pitch accent \(accent)"
+            }
+            let senses = entry.senses.prefix(4).map { sense in
+                "(\(sense.partsOfSpeech.joined(separator: ","))) \(sense.glosses.joined(separator: "; "))"
+            }
+            line += ": " + senses.joined(separator: " | ")
+            if match.isDeinflected {
+                line += " (the query is a conjugated form of this word; name the conjugation)"
+            }
+            return line
+        }
+        guard !lines.isEmpty else { return "" }
+        return """
+        Dictionary reference from JMdict, to keep the reading, pitch accent and meanings accurate. \
+        Translate the English glosses instead of copying them:
+        \(lines.joined(separator: "\n"))
+
+        """
     }
 
     func dictMessages(_ chatQuery: ChatQueryParam) -> [ChatMessage] {
@@ -386,7 +396,9 @@ extension StreamService {
         let isChineseWord =
             EZLanguageManager.shared().isChineseLanguage(sourceLanguage) && word.isChineseWord
 
-        let isWord = isEnglishWord || isChineseWord
+        let isJapaneseWord = sourceLanguage == .japanese && BuiltinDictionary.isJapaneseWord(word)
+
+        let isWord = isEnglishWord || isChineseWord || isJapaneseWord
 
         let sourceLanguageString = sourceLanguage.rawValue
 
@@ -410,11 +422,23 @@ extension StreamService {
             exampleSentence = "例句"
         }
 
-        let pronunciationPrompt =
-            "Look up its pronunciation, use the format: \"\(pronunciation): /{pronunciation}/\" \n"
-        prompt.append(pronunciationPrompt)
+        if isJapaneseWord {
+            prompt.append(japaneseDictionaryReference(word))
+            let pronunciationPrompt =
+                "Give its reading in hiragana and its pitch accent number, use the format: \"\(pronunciation): {hiragana} [{accent}]\" \n"
+            prompt.append(pronunciationPrompt)
+        } else {
+            let pronunciationPrompt =
+                "Look up its pronunciation, use the format: \"\(pronunciation): /{pronunciation}/\" \n"
+            prompt.append(pronunciationPrompt)
+        }
 
-        if isEnglishWord {
+        if isJapaneseWord {
+            let partOfSpeechAndMeaningPrompt = """
+            Look up all parts of speech and meanings in \(answerLanguage.rawValue); for verbs and adjectives include the conjugation type (e.g. 五段, 一段, い形容词). Use the format: "{pos}. {meaning}", with one part of speech and meaning per line.
+            """
+            prompt.append(partOfSpeechAndMeaningPrompt)
+        } else if isEnglishWord {
             let partOfSpeechAndMeaningPrompt = """
             Look up all parts of speech and meanings. Use the format: "{pos}. {meaning}", with one part of speech and meaning per line.
             """

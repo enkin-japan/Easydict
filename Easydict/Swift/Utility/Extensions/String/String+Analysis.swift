@@ -42,12 +42,16 @@ extension String {
             return .dictionary
         }
 
-        if shouldQuerySentence(withLanguage: language), language == .english {
+        if shouldQuerySentence(withLanguage: language), Self.sentenceAnalysisLanguages.contains(language) {
             return .sentence
         }
 
         return .translation
     }
+
+    /// Languages whose sentences get sentence analysis (key words, grammar) instead of a
+    /// plain translation.
+    static let sentenceAnalysisLanguages: Set<Language> = [.english, .japanese]
 
     /// Check if text should be queried as dictionary entry
 
@@ -69,6 +73,11 @@ extension String {
             guard count <= Self.englishWordMaxLength else { return false }
             let words = wordCount
             return words == 1
+        }
+
+        if language == .japanese {
+            // A JMdict word or a conjugated form of one (食べなかった).
+            return BuiltinDictionary.isJapaneseWord(self)
         }
 
         return false

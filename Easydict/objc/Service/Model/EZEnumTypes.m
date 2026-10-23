@@ -16,6 +16,7 @@ NSString *const EZServiceTypeCustomOpenAI = @"CustomOpenAI";
 NSString *const EZServiceTypeOllama = @"Ollama";
 NSString *const EZServiceTypeMDict = @"MDict";
 NSString *const EZServiceTypeReading = @"Reading";
+NSString *const EZServiceTypeBuiltinDictionary = @"BuiltinDictionary";
 
 NSString *const EZQueryTextTypeKey = @"QueryTextType";
 NSString *const EZIntelligentQueryTextTypeKey = @"IntelligentQueryTextType";

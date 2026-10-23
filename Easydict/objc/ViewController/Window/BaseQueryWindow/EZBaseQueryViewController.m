@@ -1345,7 +1345,8 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 
     WKWebView *webView = nil;
     if ([service.serviceType isEqualToString:EZServiceTypeMDict] ||
-               [service.serviceType isEqualToString:EZServiceTypeReading]) {
+               [service.serviceType isEqualToString:EZServiceTypeReading] ||
+               [service.serviceType isEqualToString:EZServiceTypeBuiltinDictionary]) {
         EZWebViewManager *webViewManager = result.webViewManager;
         BOOL shouldRenderHTML = EZResultShouldRenderDictionaryHTML(result);
         BOOL htmlChanged = ![webViewManager.loadedHTMLString isEqualToString:result.htmlString];

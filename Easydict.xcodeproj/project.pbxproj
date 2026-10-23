@@ -441,6 +441,16 @@
 		B906F2F6BCA8D05E1EA30F76 /* NSApplication+Activate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34C6AA47163B6DA41C60FE /* NSApplication+Activate.swift */; };
 		A1963A6B0325165137369190 /* ServiceListMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B8DAFB7BA96F27DEE956D2D /* ServiceListMigration.swift */; };
 		2B8D0B2A84ECE9329012F239 /* EnglishWordChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449115CBD1A695A6B07D45C4 /* EnglishWordChecker.swift */; };
+		E48B2C7E0D515F4D585570EF /* BuiltinDictionaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB19CC4F9035DEDF14E95F1E /* BuiltinDictionaryStore.swift */; };
+		CD04BC24C8AE20BDA26C25CB /* BuiltinDictionaryEntries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 999A113A08BAD683179813A1 /* BuiltinDictionaryEntries.swift */; };
+		AD601A7C27C94FAEAA2B6BD8 /* BuiltinDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D6988F7875607505B98915 /* BuiltinDictionary.swift */; };
+		7E882363C02DAB64EAE67646 /* JapaneseDeinflector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F939852CE3597C87FB79C89 /* JapaneseDeinflector.swift */; };
+		E545F10AA8DF15593B9F655D /* WordPronouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8664275628E563D18E7B563 /* WordPronouncer.swift */; };
+		4BE527598BEB1DAF12248FB1 /* BuiltinDictionaryHTML.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7184CB7D2AD83356900DA499 /* BuiltinDictionaryHTML.swift */; };
+		74F48200180ADD3BEB9A63D0 /* BuiltinDictionaryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BE91BBE806262B64CE686B3 /* BuiltinDictionaryService.swift */; };
+		FB178CB03C6BD2345298A23B /* builtin-dictionary.sqlite.xz in Resources */ = {isa = PBXBuildFile; fileRef = 6F74A6095990F18D9AE8D366 /* builtin-dictionary.sqlite.xz */; };
+		04C24765445B9C67A6727016 /* BuiltinDictionaryLicenses.txt in Resources */ = {isa = PBXBuildFile; fileRef = 297749393708CF62284827AD /* BuiltinDictionaryLicenses.txt */; };
+		07CF4B85250D8D51428BCA25 /* BuiltinDictionaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5EE84F86F24B67F95BAE370 /* BuiltinDictionaryTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -994,6 +1004,16 @@
 		AC34C6AA47163B6DA41C60FE /* NSApplication+Activate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApplication+Activate.swift"; sourceTree = "<group>"; };
 		0B8DAFB7BA96F27DEE956D2D /* ServiceListMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceListMigration.swift; sourceTree = "<group>"; };
 		449115CBD1A695A6B07D45C4 /* EnglishWordChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnglishWordChecker.swift; sourceTree = "<group>"; };
+		CB19CC4F9035DEDF14E95F1E /* BuiltinDictionaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltinDictionaryStore.swift; sourceTree = "<group>"; };
+		999A113A08BAD683179813A1 /* BuiltinDictionaryEntries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltinDictionaryEntries.swift; sourceTree = "<group>"; };
+		C4D6988F7875607505B98915 /* BuiltinDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltinDictionary.swift; sourceTree = "<group>"; };
+		4F939852CE3597C87FB79C89 /* JapaneseDeinflector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JapaneseDeinflector.swift; sourceTree = "<group>"; };
+		F8664275628E563D18E7B563 /* WordPronouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordPronouncer.swift; sourceTree = "<group>"; };
+		7184CB7D2AD83356900DA499 /* BuiltinDictionaryHTML.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltinDictionaryHTML.swift; sourceTree = "<group>"; };
+		5BE91BBE806262B64CE686B3 /* BuiltinDictionaryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltinDictionaryService.swift; sourceTree = "<group>"; };
+		6F74A6095990F18D9AE8D366 /* builtin-dictionary.sqlite.xz */ = {isa = PBXFileReference; lastKnownFileType = file; path = "builtin-dictionary.sqlite.xz"; sourceTree = "<group>"; };
+		297749393708CF62284827AD /* BuiltinDictionaryLicenses.txt */ = {isa = PBXFileReference; lastKnownFileType = file; path = BuiltinDictionaryLicenses.txt; sourceTree = "<group>"; };
+		F5EE84F86F24B67F95BAE370 /* BuiltinDictionaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltinDictionaryTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1190,6 +1210,7 @@
 				031C66E42EDB00100025D190 /* DictionaryRendering */,
 				031C66E52EDB00200025D190 /* dictionary-overview.md */,
 				449115CBD1A695A6B07D45C4 /* EnglishWordChecker.swift */,
+				12EFCBB99AB76A7E928B0AFB /* Builtin */,
 			);
 			path = Dictionary;
 			sourceTree = "<group>";
@@ -2081,6 +2102,7 @@
 				03C408F82EF5CB830025A1F0 /* ServiceTests.swift */,
 				A20908020000000000000021 /* OpenAI */,
 				0312584E2E1802650072320C /* AppleLanguageDetectorTests.swift */,
+				F5EE84F86F24B67F95BAE370 /* BuiltinDictionaryTests.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -2870,6 +2892,30 @@
 			path = NSApplication;
 			sourceTree = "<group>";
 		};
+		12EFCBB99AB76A7E928B0AFB /* Builtin */ = {
+			isa = PBXGroup;
+			children = (
+				CB19CC4F9035DEDF14E95F1E /* BuiltinDictionaryStore.swift */,
+				999A113A08BAD683179813A1 /* BuiltinDictionaryEntries.swift */,
+				C4D6988F7875607505B98915 /* BuiltinDictionary.swift */,
+				4F939852CE3597C87FB79C89 /* JapaneseDeinflector.swift */,
+				F8664275628E563D18E7B563 /* WordPronouncer.swift */,
+				7184CB7D2AD83356900DA499 /* BuiltinDictionaryHTML.swift */,
+				5BE91BBE806262B64CE686B3 /* BuiltinDictionaryService.swift */,
+				770647824DEE3CE2FA56469B /* Resources */,
+			);
+			path = Builtin;
+			sourceTree = "<group>";
+		};
+		770647824DEE3CE2FA56469B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				6F74A6095990F18D9AE8D366 /* builtin-dictionary.sqlite.xz */,
+				297749393708CF62284827AD /* BuiltinDictionaryLicenses.txt */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -3084,6 +3130,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04C24765445B9C67A6727016 /* BuiltinDictionaryLicenses.txt in Resources */,
+				FB178CB03C6BD2345298A23B /* builtin-dictionary.sqlite.xz in Resources */,
 				51CD551EA35B629E724A0274 /* ReadingDataLicenses.txt in Resources */,
 				A655F7151C2EE1157E3072D9 /* ja-furigana.tsv.lzfse in Resources */,
 				DE2C0D1D9D64D04086C76CE1 /* zh-characters.tsv.lzfse in Resources */,
@@ -3250,6 +3298,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				07CF4B85250D8D51428BCA25 /* BuiltinDictionaryTests.swift in Sources */,
 				1CC83D91B3954BE7894CC2C8 /* MDictReaderTests.swift in Sources */,
 				02DEDC0420260430000000BE /* MarkdownRendererTests.swift in Sources */,
 				A12760012026090500000001 /* ReverseTranslationTests.swift in Sources */,
@@ -3279,6 +3328,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				74F48200180ADD3BEB9A63D0 /* BuiltinDictionaryService.swift in Sources */,
+				4BE527598BEB1DAF12248FB1 /* BuiltinDictionaryHTML.swift in Sources */,
+				E545F10AA8DF15593B9F655D /* WordPronouncer.swift in Sources */,
+				7E882363C02DAB64EAE67646 /* JapaneseDeinflector.swift in Sources */,
+				AD601A7C27C94FAEAA2B6BD8 /* BuiltinDictionary.swift in Sources */,
+				CD04BC24C8AE20BDA26C25CB /* BuiltinDictionaryEntries.swift in Sources */,
+				E48B2C7E0D515F4D585570EF /* BuiltinDictionaryStore.swift in Sources */,
 				2B8D0B2A84ECE9329012F239 /* EnglishWordChecker.swift in Sources */,
 				A1963A6B0325165137369190 /* ServiceListMigration.swift in Sources */,
 				B906F2F6BCA8D05E1EA30F76 /* NSApplication+Activate.swift in Sources */,
@@ -3781,7 +3837,7 @@
 		"CODE_SIGN_STYLE" = "$CODE_SIGN_STYLE";
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 75;
+		"CURRENT_PROJECT_VERSION" = 76;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = dwarf;
 		"DEVELOPMENT_TEAM" = "$(DEVELOPMENT_TEAM)";
@@ -3829,7 +3885,7 @@
 		"CODE_SIGN_STYLE" = Manual;
 		"COMBINE_HIDPI_IMAGES" = YES;
 		"COPY_PHASE_STRIP" = NO;
-		"CURRENT_PROJECT_VERSION" = 75;
+		"CURRENT_PROJECT_VERSION" = 76;
 		"DEAD_CODE_STRIPPING" = YES;
 		"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 		"DEVELOPMENT_TEAM" = "";

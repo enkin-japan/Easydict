@@ -34,6 +34,7 @@ FOUNDATION_EXPORT EZServiceType const EZServiceTypeCustomOpenAI;
 FOUNDATION_EXPORT EZServiceType const EZServiceTypeOllama;
 FOUNDATION_EXPORT EZServiceType const EZServiceTypeMDict;
 FOUNDATION_EXPORT EZServiceType const EZServiceTypeReading;
+FOUNDATION_EXPORT EZServiceType const EZServiceTypeBuiltinDictionary;
 
 FOUNDATION_EXPORT NSString *const EZQueryTextTypeKey;
 FOUNDATION_EXPORT NSString *const EZIntelligentQueryTextTypeKey;

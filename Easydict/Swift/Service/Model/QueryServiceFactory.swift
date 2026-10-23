@@ -90,6 +90,7 @@ final class QueryServiceFactory: NSObject {
     /// Slim build: a fixed set of local services. Every window lists all of them;
     /// the user can only enable, disable and reorder them.
     private let serviceRegistrations: [ServiceRegistration] = [
+        .init(.builtinDictionary, BuiltinDictionaryService.self, "service.builtin_dictionary.name"),
         .init(.reading, ReadingService.self, "service.reading.name"),
         .init(.mDict, MDictService.self, "service.mdict.name"),
         .init(.customOpenAI, CustomOpenAIService.self, "custom_openai"),

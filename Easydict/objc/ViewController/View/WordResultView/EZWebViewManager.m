@@ -16,7 +16,8 @@ static NSString *kMethod = @"method";
 
 BOOL EZResultNeedsDictionaryHTMLHeight(EZQueryResult *result) {
     return [result.serviceTypeId isEqualToString:EZServiceTypeMDict] ||
-           [result.serviceTypeId isEqualToString:EZServiceTypeReading];
+           [result.serviceTypeId isEqualToString:EZServiceTypeReading] ||
+           [result.serviceTypeId isEqualToString:EZServiceTypeBuiltinDictionary];
 }
 
 BOOL EZResultShouldRenderDictionaryHTML(EZQueryResult *result) {
@@ -95,6 +96,14 @@ BOOL EZResultShouldRenderDictionaryHTML(EZQueryResult *result) {
             MMLogInfo(@"<javascript log>: %@", message);
         }
         
+        if ([body[kMethod] isEqualToString:@"pronounce"]) {
+            NSString *text = body[@"text"];
+            NSString *language = body[@"language"];
+            if ([text isKindOfClass:NSString.class] && [language isKindOfClass:NSString.class]) {
+                [EZWordPronouncer.shared speak:text languageCode:language];
+            }
+        }
+
         if ([body[kMethod] isEqualToString:@"noteToUpdateScrollHeight"]) {
             NSUInteger renderGeneration = [body[@"renderGeneration"] unsignedIntegerValue];
             if (![self isCurrentRenderGeneration:renderGeneration]) {
