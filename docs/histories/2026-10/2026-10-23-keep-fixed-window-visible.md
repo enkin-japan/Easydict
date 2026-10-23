@@ -38,6 +38,8 @@
   - 开关关闭：URL scheme 打开侧悬浮窗口后切到访达，窗口关闭。
   - 开关打开：窗口层级为 19（钉住），切到访达后仍显示。
   - 窗口显示时切换开关：打开后立即钉住，再关闭后恢复普通层级。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；Release `v2.25.0-slim.9` 附 DMG
+  （SHA-256 `4ad7dd39…84f4cf`）与 Sparkle 更新包（21686627 字节），appcast 指向 build 75。
 - 未运行：单元测试（改动不涉及已有测试覆盖的逻辑）；设置界面的人工点击确认。
 
 ### 受影响文件
