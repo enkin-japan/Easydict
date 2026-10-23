@@ -6,6 +6,7 @@
 //  Copyright © 2024 izual. All rights reserved.
 //
 
+import AppKit
 import Combine
 import Defaults
 import Foundation
@@ -49,6 +50,7 @@ class MyConfiguration: NSObject {
     @DefaultsWrapper(.fixedWindowPosition) var fixedWindowPosition: EZShowWindowPosition
     @DefaultsWrapper(.miniWindowPosition) var miniWindowPosition: EZShowWindowPosition
     @DefaultsWrapper(.pinWindowWhenDisplayed) var pinWindowWhenDisplayed
+    @DefaultsWrapper(.keepFixedWindowVisible) var keepFixedWindowVisible: Bool
     @DefaultsWrapper(.hideMainWindow) var hideMainWindow: Bool
 
     @DefaultsWrapper(.clearQueryWhenInputTranslate) var clearInput: Bool
@@ -252,6 +254,14 @@ class MyConfiguration: NSObject {
             }
             .store(in: &cancellables)
 
+        Defaults.publisher(.keepFixedWindowVisible, options: [])
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.didSetKeepFixedWindowVisible()
+            }
+            .store(in: &cancellables)
+
         Defaults.publisher(.mouseSelectTranslateWindowType, options: [])
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
@@ -408,6 +418,16 @@ extension MyConfiguration {
 
     fileprivate func didSetFixedWindowPosition() {
         logSettings(["show_fixed_window_position": fixedWindowPosition])
+    }
+
+    fileprivate func didSetKeepFixedWindowVisible() {
+        logSettings(["keep_fixed_window_visible": keepFixedWindowVisible])
+
+        // Apply to a fixed window that is already showing; the window is not created just for this.
+        let fixedWindow = NSApp.windows.first { $0 is EZFixedQueryWindow && $0.isVisible }
+        if let fixedWindow = fixedWindow as? EZBaseQueryWindow {
+            fixedWindow.isPin = keepFixedWindowVisible || pinWindowWhenDisplayed
+        }
     }
 
     fileprivate func didSetMouseSelectTranslateWindowType() {

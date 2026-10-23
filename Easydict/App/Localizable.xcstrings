@@ -8102,6 +8102,46 @@
         }
       }
     },
+    "setting.advance.window.keep_fixed_window_visible" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep floating window visible"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantener visible la ventana flotante"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フローティングウィンドウを常に表示"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponechať plávajúce okno zobrazené"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "侧悬浮窗口始终显示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浮動視窗保持顯示"
+          }
+        }
+      }
+    },
     "setting.advance.window.max_height_percentage" : {
       "localizations" : {
         "en" : {

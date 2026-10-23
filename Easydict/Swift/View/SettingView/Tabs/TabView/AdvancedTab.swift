@@ -242,6 +242,14 @@ struct AdvancedTab: View {
                     )
                 }
 
+                Toggle(isOn: $keepFixedWindowVisible) {
+                    AdvancedTabItemView(
+                        color: .orange,
+                        icon: .pinFill,
+                        labelText: "setting.advance.window.keep_fixed_window_visible"
+                    )
+                }
+
                 Toggle(isOn: $hideMainWindow) {
                     AdvancedTabItemView(
                         color: .mint,
@@ -338,6 +346,7 @@ struct AdvancedTab: View {
     @Default(.mouseSelectTranslateWindowType) private var mouseSelectTranslateWindowType
     @Default(.shortcutSelectTranslateWindowType) private var shortcutSelectTranslateWindowType
     @Default(.pinWindowWhenDisplayed) private var pinWindowWhenDisplayed
+    @Default(.keepFixedWindowVisible) private var keepFixedWindowVisible
     @Default(.hideMainWindow) private var hideMainWindow
 
     @Default(.enableVocabularyNotebook) private var enableVocabularyNotebook

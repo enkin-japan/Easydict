@@ -84,6 +84,10 @@ extension Defaults.Keys {
     static let pinWindowWhenDisplayed = Key<Bool>(
         "EZConfiguration_kPinWindowWhenDisplayed", default: false
     )
+    /// Keeps the fixed window pinned, so it stays on screen when another app is clicked.
+    static let keepFixedWindowVisible = Key<Bool>(
+        "EZConfiguration_kKeepFixedWindowVisible", default: false
+    )
 
     static let allowCrashLog = Key<Bool>("EZConfiguration_kAllowCrashLogKey", default: true)
     static let allowAnalytics = Key<Bool>("EZConfiguration_kAllowAnalyticsKey", default: true)
