@@ -79,6 +79,8 @@ GitHub Release `v2.25.0-slim.10`（enkin-japan/Easydict）
   - 首次解压用时 0.74 秒；服务列表变为 `BuiltinDictionary, Reading, MDict, CustomOpenAI`。
   - URL scheme 查询「食べなかった」后结果窗口按内容增高，日志没有内置词典错误。
   - 测试后恢复 Debug 偏好设置。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；Release `v2.25.0-slim.10` 附 DMG
+  （SHA-256 `69f99d0e…550267`）与 Sparkle 更新包（47816929 字节，上一版为 21686627 字节），appcast 指向 build 76。
 - Review：线程安全、SQLite 使用、路由影响和列表规范化。修复两处 P3：英语排序比较函数不满足严格弱序；
   解压文件只按压缩包大小判断新旧，改为同时带 build 号。
 - 未验证：

@@ -3,17 +3,18 @@
     <channel>
         <title>Easydict Slim</title>
         <item>
-            <title>2.25.0 (75)</title>
-            <pubDate>Fri, 23 Oct 2026 22:30:00 +0900</pubDate>
-            <description>&lt;h2&gt;Easydict Slim 2.25.0 (75)&lt;/h2&gt;
+            <title>2.25.0 (76)</title>
+            <pubDate>Fri, 23 Oct 2026 23:20:00 +0900</pubDate>
+            <description>&lt;h2&gt;Easydict Slim 2.25.0 (76)&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;新增“侧悬浮窗口始终显示”设置：打开后侧悬浮窗口点击其他 App 也不会关闭，并浮在其他窗口之上。&lt;/li&gt;
+&lt;li&gt;新增离线内置词典（日语 / 英语）：读音、声调、汉字、例句，系统语音发音；日语活用形自动还原。&lt;/li&gt;
+&lt;li&gt;句子分析只给意译；日语句子和单词也支持句子分析和查单词。&lt;/li&gt;
 &lt;/ul&gt;</description>
-            <sparkle:version>75</sparkle:version>
+            <sparkle:version>76</sparkle:version>
             <sparkle:shortVersionString>2.25.0</sparkle:shortVersionString>
-            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.9</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.10</sparkle:fullReleaseNotesLink>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.9/Easydict.zip" length="21686627" type="application/octet-stream" sparkle:edSignature="n8eEz8e94mXf8k+wyyTFFBbtx6NBW3yXwODyi2Rkd5jAUuEHB5NvHURdvqjd5uUhSkYLeu+7C17ADUcXoIhsDg=="/>
+            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.10/Easydict.zip" length="47816929" type="application/octet-stream" sparkle:edSignature="50dg9j7hJzO2SfQ+wPV28ama2BiYPIO+qxf7Cr/9cdt08bcbrvvS4ceXfk9Cf0GLftqtgDBkqkEASWdbzdOzAg=="/>
         </item>
     </channel>
 </rss>
