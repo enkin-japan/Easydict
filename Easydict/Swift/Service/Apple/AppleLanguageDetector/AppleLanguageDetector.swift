@@ -47,14 +47,11 @@ import NaturalLanguage
 public class AppleLanguageDetector: NSObject {
     // MARK: Lifecycle
 
-    /// Initialize language detector with optional debug logging and classical Chinese detection
+    /// Initialize language detector with optional debug logging
     ///
-    /// - Parameters:
-    ///   - enableDebugLog: Whether to enable debug logging output (default: false)
-    ///   - enableClassicalChineseDetection: Whether to enable classical Chinese detection (default: true)
-    public init(enableDebugLog: Bool = false, enableClassicalChineseDetection: Bool = true) {
+    /// - Parameter enableDebugLog: Whether to enable debug logging output (default: false)
+    public init(enableDebugLog: Bool = false) {
         self.isDebugLogEnabled = enableDebugLog
-        self.isClassicalChineseDetectionEnabled = enableClassicalChineseDetection
         super.init()
     }
 
@@ -62,8 +59,6 @@ public class AppleLanguageDetector: NSObject {
 
     /// Controls whether debug logging is enabled
     public let isDebugLogEnabled: Bool
-    /// Controls whether classical Chinese detection is enabled
-    public let isClassicalChineseDetectionEnabled: Bool
 
     /// Records Chinese character statistics when English is detected and user prefers Chinese
     public private(set) var chineseCharacterCount: Int = 0
@@ -135,23 +130,15 @@ public class AppleLanguageDetector: NSObject {
         englishCharacterRatio = 0.0
         hasMixedScripts = false
         isAnalyzed = false
-        chineseGenreAnalyzer = nil
 
         rawProbabilities = [:]
         adjustedProbabilities = [:]
-    }
-
-    public func getTextAnalysis() -> TextAnalysis? {
-        chineseGenreAnalyzer?.analysis
     }
 
     // MARK: Private
 
     /// Shared language mapper for converting between Apple NLLanguage and Easydict Language enums
     private let languageMapper = AppleLanguageMapper.shared
-
-    /// Chinese text detection utility for classical Chinese analysis
-    private var chineseGenreAnalyzer: ChineseGenreAnalyzer?
 
     /// Internal unified language detection with configurable post-processing
     ///
@@ -439,7 +426,7 @@ public class AppleLanguageDetector: NSObject {
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Determine Chinese type (simplified,traditional, or classical)
+    /// Determine Chinese type (simplified or traditional)
     private func determineChineseType(
         for text: String,
         detectedLanguage: Language
@@ -448,19 +435,6 @@ public class AppleLanguageDetector: NSObject {
         // This function is only used for Chinese text detection
         if !detectedLanguage.isChinese {
             return nil
-        }
-
-        if isClassicalChineseDetectionEnabled, MyConfiguration.shared.beta {
-            // Initialize ChineseDetection if not already created
-            if chineseGenreAnalyzer == nil {
-                chineseGenreAnalyzer = ChineseGenreAnalyzer(text: text)
-            }
-
-            // Use ChineseGenreAnalyzer to analyze if it's classical Chinese
-            let analysis = chineseGenreAnalyzer!.detect()
-            if analysis.genre.isClassical {
-                return .classicalChinese
-            }
         }
 
         // Record Chinese character statistics if conditions are met

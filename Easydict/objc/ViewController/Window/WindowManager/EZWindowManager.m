@@ -270,28 +270,6 @@ static EZWindowManager *_instance;
 
 #pragma mark - Show Floating Window
 
-/// Show floating window with OCR image, auto query or not.
-- (void)showFloatingWindowWithOCRImage:(NSImage *)image
-                             autoQuery:(BOOL)autoQuery
-                            actionType:(EZActionType)actionType {
-    if (!image) {
-        MMLogWarn(@"Image is nil, cannot show OCR window");
-        return;
-    }
-
-    MMLogInfo(@"Show window with OCR image");
-
-    EZWindowType windowType = MyConfiguration.shared.shortcutSelectTranslateWindowType;
-    EZBaseQueryWindow *window = [self windowWithType:windowType];
-
-    // Reset window height first, avoid being affected by previous window height.
-    [window.queryViewController resetTableView:^{
-        self.actionType = actionType;
-        [self showFloatingWindowType:windowType queryText:nil];
-        [window.queryViewController startOCRImage:image actionType:actionType autoQuery:autoQuery];
-    }];
-}
-
 /// Show floating window.
 - (void)showFloatingWindowType:(EZWindowType)windowType queryText:(nullable NSString *)queryText {
     [self showFloatingWindowType:windowType queryText:queryText actionType:self.actionType];
@@ -843,23 +821,14 @@ static EZWindowManager *_instance;
     [self showFloatingWindowType:windowType queryText:nil];
 }
 
-/// Translate text from pasteboard, support both image and text.
+/// Translate the text on the pasteboard.
 - (void)pasteboardTranslate:(EZWindowType)windowType {
     MMLogInfo(@"Pasteboard Translate with windowType: %@", @(windowType));
 
     self.actionType = EZActionTypePasteboardTranslate;
 
-    // Try to read image from pasteboard first.
-    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-    NSImage *image = pasteboard.image;
-    if (image) {
-        BOOL autoQuery = [MyConfiguration.shared autoQueryOCRText];
-        [self showFloatingWindowWithOCRImage:image autoQuery:autoQuery actionType:self.actionType];
-        return;
-    }
-
     // Explicit text translation always queries, regardless of the ordinary paste preference.
-    NSString *queryText = pasteboard.string;
+    NSString *queryText = [NSPasteboard generalPasteboard].string;
     if (queryText.length > 0) {
         [self showFloatingWindowType:windowType queryText:queryText autoQuery:YES actionType:self.actionType];
     }
@@ -901,22 +870,12 @@ static EZWindowManager *_instance;
     queryWindow.pin = !queryWindow.pin;
 }
 
-- (void)closeWindowOrExitSreenshot {
-    MMLogInfo(@"Close window, or exit screenshot");
-
-    [self closeFloatingWindow];
-}
-
 - (void)toggleTranslationLanguages {
     [self.floatingWindow.queryViewController toggleTranslationLanguages];
 }
 
 - (void)focusInputTextView {
     [self.floatingWindow.queryViewController focusInputTextView];
-}
-
-- (void)playOrStopQueryTextAudio {
-    [self.floatingWindow.queryViewController togglePlayQueryText];
 }
 
 

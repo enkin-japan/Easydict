@@ -32,7 +32,6 @@ extension MyConfiguration {
     @MainActor
     func resetUserDefaultsData() {
         guard let bundleIdentifier = Bundle.main.bundleIdentifier else { return }
-        CodexRequestCoordinator.shared.reset()
         UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
     }
 

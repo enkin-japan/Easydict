@@ -9,7 +9,7 @@
 import AppKit
 import SFSafeSymbols
 
-/// Inline icon button shown next to the audio/copy/link buttons on AI result
+/// Inline icon button shown next to the copy/link buttons on AI result
 /// cards. Toggles Markdown rendering for the owning result; the click handler
 /// notifies the host view to flip `QueryResult.markdownRenderingOverride` and
 /// rebuild the result label.

@@ -172,7 +172,7 @@ public class QueryResult: NSObject {
 
     var queryModel: QueryModel = .init()
 
-    var serviceTypeWithUniqueIdentifier: String = ServiceType.youdao.rawValue
+    var serviceTypeId = ""
 
     var isShowing: Bool = false
     var viewHeight: CGFloat = 0
@@ -189,9 +189,6 @@ public class QueryResult: NSObject {
     var error: QueryError?
 
     var manualShow: Bool = false
-
-    var fromSpeakURL: String?
-    var toSpeakURL: String?
 
     @nonobjc var raw: Any?
 
@@ -296,15 +293,13 @@ public class QueryResult: NSObject {
         wordResult = nil
         error = nil
         validationMessage = nil
-        serviceTypeWithUniqueIdentifier = ServiceType.youdao.rawValue
+        serviceTypeId = ""
         isShowing = false
         isLoading = false
         viewHeight = 0
         queryText = ""
         from = .auto
         to = .auto
-        toSpeakURL = nil
-        fromSpeakURL = nil
         raw = nil
         promptTitle = nil
         promptURL = nil

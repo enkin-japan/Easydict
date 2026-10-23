@@ -37,13 +37,6 @@ struct MenuItemView: View {
 
             Divider()
 
-            if showOCRMenuItems {
-                pasteboardOCRItem
-                showOCRWindowItem
-            }
-
-            Divider()
-
             translateAndReplaceItem.keyboardShortcut(.translateAndReplace)
 
             Divider()
@@ -73,7 +66,6 @@ struct MenuItemView: View {
 
     @Environment(\.openURL) private var openURL
 
-    @Default(.showOCRMenuItems) private var showOCRMenuItems
     @Default(.mouseSelectTranslateWindowType) private var mouseSelectTranslateWindowType
     @Default(.shortcutSelectTranslateWindowType) private var shortcutSelectTranslateWindowType
 
@@ -95,14 +87,6 @@ struct MenuItemView: View {
 
     @ViewBuilder private var miniWindowItem: some View {
         menuItem(for: .showMiniWindow)
-    }
-
-    @ViewBuilder private var pasteboardOCRItem: some View {
-        menuItem(for: .pasteboardOCR)
-    }
-
-    @ViewBuilder private var showOCRWindowItem: some View {
-        menuItem(for: .showOCRWindow)
     }
 
     // MARK: - Other Items

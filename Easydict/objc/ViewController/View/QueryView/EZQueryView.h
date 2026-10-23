@@ -8,14 +8,13 @@
 
 #import "EZTextView.h"
 #import "EZLoadingAnimationView.h"
-#import "EZAudioButton.h"
 #import "NSObject+EZWindowType.h"
 
 @class EZQueryModel;
 
 NS_ASSUME_NONNULL_BEGIN
 
-static CGFloat const EZQueryViewExceptInputViewHeight = EZAudioButtonWidthHeight_24 + EZAudioButtonInputViewTopPadding_4 + EZAudioButtonBottomMargin_4; // 32;
+static CGFloat const EZQueryViewExceptInputViewHeight = EZActionButtonWidthHeight_24 + EZActionButtonInputViewTopPadding_4 + EZActionButtonBottomMargin_4; // 32;
 
 static NSTimeInterval const EZDelayDetectTextLanguageInterval = 1.0;
 
@@ -28,14 +27,11 @@ static NSTimeInterval const EZDelayDetectTextLanguageInterval = 1.0;
 @property (nonatomic, copy) NSString *placeholderText;
 @property (nonatomic, copy) NSString *alertText;
 
-@property (nonatomic, strong) EZAudioButton *audioButton;
-
 @property (nonatomic, assign) BOOL clearButtonHidden;
 @property (nonatomic, assign) BOOL isTypingChinese;
 
 @property (nonatomic, copy) void (^enterActionBlock)(NSString *text);
 
-@property (nonatomic, copy) void (^playAudioBlock)(NSString *text);
 @property (nonatomic, copy) void (^copyTextBlock)(NSString *text);
 @property (nonatomic, copy) void (^detectActionBlock)(NSButton *button);
 @property (nonatomic, copy) void (^clearBlock)(NSString *text);

@@ -77,7 +77,7 @@ struct AnkiConnectSettingsView: View {
     @State private var isFetchingFields = false
     @State private var isLoadingPreview = false
     @State private var previewTextInput = ""
-    @State private var previewServiceID = ServiceType.youdao.rawValue
+    @State private var previewServiceID = ServiceType.mDict.rawValue
     @State private var previewError: String?
     @State private var previewValues: [AnkiFieldPreviewValue] = []
     @State private var previewFields: [AnkiRenderedFieldPreview] = []
@@ -98,13 +98,9 @@ extension AnkiConnectSettingsView {
         enableAnkiConnect ? .green : .red
     }
 
+    /// Slim build: MDict is the only dictionary service.
     private var previewServiceTypes: [ServiceType] {
-        // Slim build: only offline dictionaries are available.
-        if Defaults[.mdictDictionaries].contains(where: \.enabled) {
-            return [.appleDictionary, .mDict]
-        }
-
-        return [.appleDictionary]
+        [.mDict]
     }
 
     private var endpointRow: some View {
@@ -609,7 +605,7 @@ extension AnkiConnectSettingsView {
         let result = QueryResult()
         result.queryModel = model
         result.queryText = model.queryText.isEmpty ? text : model.queryText
-        result.serviceTypeWithUniqueIdentifier = serviceID
+        result.serviceTypeId = serviceID
         result.from = model.queryFromLanguage
         result.to = model.queryTargetLanguage
         return result
@@ -621,7 +617,7 @@ extension AnkiConnectSettingsView {
             return previewServiceID
         }
 
-        return serviceIDs.first ?? ServiceType.youdao.rawValue
+        return serviceIDs.first ?? ServiceType.mDict.rawValue
     }
 
     private func previewServiceName(_ serviceType: ServiceType) -> String {

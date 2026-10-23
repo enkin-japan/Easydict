@@ -18,12 +18,7 @@ final class LocalStorage: NSObject {
 
     private override init() {
         super.init()
-        if let domain = Bundle.main.bundleIdentifier {
-            let snapshot = userDefaults.persistentDomain(forName: domain) ?? [:]
-            for uuid in CodexConfigurationMigration.legacyUUIDs(in: snapshot) {
-                Defaults[CodexAccessMode.key(uuid: uuid)] = .localCLI
-            }
-        }
+        ServiceListMigration.migrateIfNeeded()
         setup()
     }
 
@@ -83,19 +78,39 @@ final class LocalStorage: NSObject {
         sharedInstance = nil
     }
 
-    /// Returns added service type identifiers for the given window.
+    /// Returns the service type identifiers of the given window, in the user's order.
+    ///
+    /// Every registered service is listed: stored types that are no longer registered are dropped,
+    /// and services missing from the stored list are appended disabled.
     /// - Parameter windowType: Window type to query.
     /// - Returns: Ordered service type identifiers.
     @objc(allServiceTypes:)
     func allServiceTypes(_ windowType: EZWindowType) -> [String] {
-        let allServiceTypesKey = serviceTypesKey(of: windowType)
+        let allServiceTypesKey = Self.serviceTypesKey(of: windowType)
+        let registeredTypes = QueryServiceFactory.shared.allServiceTypeIDs
 
         guard let storedTypes = userDefaults.array(forKey: allServiceTypesKey) as? [String] else {
-            userDefaults.set(defaultServiceTypeIDs, forKey: allServiceTypesKey)
-            return defaultServiceTypeIDs
+            userDefaults.set(registeredTypes, forKey: allServiceTypesKey)
+            return registeredTypes
         }
 
-        return storedTypes
+        var serviceTypes = storedTypes.filter { registeredTypes.contains($0) }
+        let missingTypes = registeredTypes.filter { !serviceTypes.contains($0) }
+        serviceTypes += missingTypes
+        for typeId in missingTypes {
+            let type = ServiceType(rawValue: typeId)
+            if serviceInfo(withType: type, windowType: windowType) == nil {
+                setServiceInfo(
+                    QueryServiceConfiguration(type: type, enabled: false, windowType: windowType),
+                    windowType: windowType
+                )
+            }
+        }
+
+        if serviceTypes != storedTypes {
+            userDefaults.set(serviceTypes, forKey: allServiceTypesKey)
+        }
+        return serviceTypes
     }
 
     /// Persists ordered service type identifiers for the given window.
@@ -104,90 +119,7 @@ final class LocalStorage: NSObject {
     ///   - windowType: Target window type.
     @objc(setAllServiceTypes:windowType:)
     func setAllServiceTypes(_ allServiceTypes: [String], windowType: EZWindowType) {
-        let allServiceTypesKey = serviceTypesKey(of: windowType)
-        userDefaults.set(allServiceTypes, forKey: allServiceTypesKey)
-    }
-
-    func availableServiceTypeIDs(windowType: EZWindowType) -> [String] {
-        let addedServiceTypeIds = allServiceTypes(windowType)
-        let savedServiceTypeIds = [EZWindowType.fixed, .main, .mini]
-            .flatMap { allServiceTypes($0) }
-        let allServiceTypeIds = QueryServiceFactory.shared.allServiceTypeIDs + savedServiceTypeIds
-        var seenTypeIds = Set<String>()
-        let uniqueTypeIds = allServiceTypeIds.filter {
-            seenTypeIds.insert($0).inserted
-        }
-
-        return uniqueTypeIds.filter { typeId in
-            guard let metadata = QueryServiceFactory.shared.metadata(withTypeId: typeId) else {
-                return false
-            }
-            if metadata.allowsMultipleInstances, metadata.uuid.isEmpty {
-                return true
-            }
-            return !containsServiceType(
-                typeId,
-                in: addedServiceTypeIds,
-                metadata: metadata
-            )
-        }
-    }
-
-    @discardableResult
-    func addServiceType(_ serviceTypeId: String, windowType: EZWindowType) -> Bool {
-        guard let metadata = QueryServiceFactory.shared.metadata(withTypeId: serviceTypeId) else {
-            return false
-        }
-
-        var serviceTypeIds = allServiceTypes(windowType)
-        let alreadyAdded = containsServiceType(
-            serviceTypeId,
-            in: serviceTypeIds,
-            metadata: metadata
-        )
-        guard !alreadyAdded else {
-            return false
-        }
-
-        if metadata.serviceType == .codexCLI {
-            // Persist the mode before membership: an interrupted addition must not
-            // look like a legacy installation on the next launch.
-            let modeKey = CodexAccessMode.key(uuid: metadata.uuid)
-            Defaults[modeKey] = Defaults[modeKey]
-        }
-        serviceTypeIds.append(serviceTypeId)
-        setAllServiceTypes(serviceTypeIds, windowType: windowType)
-        ensureServiceInfoForAddition(metadata: metadata, windowType: windowType)
-        return true
-    }
-
-    @discardableResult
-    func removeServiceType(_ serviceTypeId: String, windowType: EZWindowType) -> Bool {
-        removeServiceType(serviceTypeId, windowType: windowType, allowRemovingLast: false)
-    }
-
-    @discardableResult
-    func removeServiceType(
-        _ serviceTypeId: String,
-        windowType: EZWindowType,
-        allowRemovingLast: Bool
-    )
-        -> Bool {
-        let serviceTypeIds = allServiceTypes(windowType)
-        guard allowRemovingLast || serviceTypeIds.count > 1 else {
-            return false
-        }
-
-        let updatedServiceTypeIds = serviceTypeIds.filter { $0 != serviceTypeId }
-        guard updatedServiceTypeIds.count != serviceTypeIds.count else {
-            return false
-        }
-        guard allowRemovingLast || !updatedServiceTypeIds.isEmpty else {
-            return false
-        }
-
-        setAllServiceTypes(updatedServiceTypeIds, windowType: windowType)
-        return true
+        userDefaults.set(allServiceTypes, forKey: Self.serviceTypesKey(of: windowType))
     }
 
     /// Returns configured services for the given window with persisted flags applied.
@@ -217,28 +149,15 @@ final class LocalStorage: NSObject {
 
     func enabledServiceTypeIDs(_ windowType: EZWindowType) -> [String] {
         allServiceTypes(windowType).filter { typeId in
-            let components = serviceIdentifierComponents(from: typeId)
-            let baseType = ServiceType(rawValue: components.rawType)
-            let info = serviceInfo(
-                withType: baseType,
-                serviceId: components.uuid,
-                windowType: windowType
-            )
-            return info?.enabled == true
+            serviceInfo(withType: ServiceType(rawValue: typeId), windowType: windowType)?.enabled == true
         }
     }
 
     func setServiceEnabled(_ enabled: Bool, serviceTypeId: String, windowType: EZWindowType) {
-        let components = serviceIdentifierComponents(from: serviceTypeId)
-        let baseType = ServiceType(rawValue: components.rawType)
-        let info = serviceInfo(
-            withType: baseType,
-            serviceId: components.uuid,
-            windowType: windowType
-        ) ??
+        let type = ServiceType(rawValue: serviceTypeId)
+        let info = serviceInfo(withType: type, windowType: windowType) ??
             QueryServiceConfiguration(
-                uuid: components.uuid,
-                type: baseType,
+                type: type,
                 enabled: enabled,
                 enabledQuery: queryCount == 0,
                 windowType: windowType
@@ -249,7 +168,7 @@ final class LocalStorage: NSObject {
 
     /// Returns a service instance with persisted flags applied.
     /// - Parameters:
-    ///   - serviceTypeId: Service type identifier, possibly containing a UUID suffix.
+    ///   - serviceTypeId: Service type identifier.
     ///   - windowType: Target window type.
     /// - Returns: Configured service instance, or `nil` for unrecognized types.
     @objc(service:windowType:)
@@ -263,37 +182,22 @@ final class LocalStorage: NSObject {
         return service
     }
 
-    /// Fetches persisted service info for a service type and id.
+    /// Fetches persisted service info for a service type.
     /// - Parameters:
     ///   - type: Service type identifier.
-    ///   - serviceId: Unique service identifier.
     ///   - windowType: Target window type.
     /// - Returns: Persisted service info when available.
-    @objc(serviceInfoWithType:serviceId:windowType:)
-    func serviceInfo(
-        withType type: ServiceType,
-        serviceId: String,
-        windowType: EZWindowType
-    )
-        -> QueryServiceConfiguration? {
-        guard let data = storedServiceInfoData(type: type, serviceId: serviceId, windowType: windowType) else {
+    @objc(serviceInfoWithType:windowType:)
+    func serviceInfo(withType type: ServiceType, windowType: EZWindowType) -> QueryServiceConfiguration? {
+        guard let data = userDefaults.data(forKey: Self.serviceInfoKey(type: type, windowType: windowType)) else {
             return nil
         }
 
         if let info = try? decoder.decode(QueryServiceConfiguration.self, from: data) {
-            return normalized(info, fallbackType: type, serviceId: serviceId, windowType: windowType)
+            return normalized(info, type: type, windowType: windowType)
         }
 
-        if let legacyInfo = decodeLegacyServiceInfo(
-            from: data,
-            fallbackType: type,
-            serviceId: serviceId,
-            windowType: windowType
-        ) {
-            return legacyInfo
-        }
-
-        return nil
+        return decodeLegacyServiceInfo(from: data, type: type, windowType: windowType)
     }
 
     /// Persists a service info record.
@@ -302,23 +206,11 @@ final class LocalStorage: NSObject {
     ///   - windowType: Target window type.
     @objc(setServiceInfo:windowType:)
     func setServiceInfo(_ serviceInfo: QueryServiceConfiguration, windowType: EZWindowType) {
-        let normalizedInfo = normalized(
-            serviceInfo,
-            fallbackType: serviceInfo.type,
-            serviceId: serviceInfo.uuid,
-            windowType: windowType
-        )
-
+        let normalizedInfo = normalized(serviceInfo, type: serviceInfo.type, windowType: windowType)
         guard let data = try? encoder.encode(normalizedInfo) else {
             return
         }
-
-        let serviceInfoKey = key(
-            forServiceType: normalizedInfo.type,
-            serviceId: normalizedInfo.uuid,
-            windowType: windowType
-        )
-        userDefaults.set(data, forKey: serviceInfoKey)
+        userDefaults.set(data, forKey: Self.serviceInfoKey(type: normalizedInfo.type, windowType: windowType))
     }
 
     /// Persists a service's current state.
@@ -335,13 +227,11 @@ final class LocalStorage: NSObject {
     /// - Parameters:
     ///   - enabledQuery: Whether the service is allowed to query.
     ///   - serviceType: Service type identifier.
-    ///   - serviceId: Unique service identifier.
     ///   - windowType: Target window type.
-    @objc(setEnabledQuery:serviceType:serviceId:windowType:)
-    func setEnabledQuery(_ enabledQuery: Bool, serviceType: ServiceType, serviceId: String, windowType: EZWindowType) {
-        let info = serviceInfo(withType: serviceType, serviceId: serviceId, windowType: windowType) ??
+    @objc(setEnabledQuery:serviceType:windowType:)
+    func setEnabledQuery(_ enabledQuery: Bool, serviceType: ServiceType, windowType: EZWindowType) {
+        let info = serviceInfo(withType: serviceType, windowType: windowType) ??
             QueryServiceConfiguration(
-                uuid: serviceId,
                 type: serviceType,
                 enabled: true,
                 enabledQuery: enabledQuery,
@@ -416,9 +306,10 @@ final class LocalStorage: NSObject {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
-    private let defaultServiceTypeIDs: [String] = [
+    /// Services enabled in a window the first time it is set up.
+    private let defaultEnabledServiceTypeIDs: [String] = [
         ServiceType.reading.rawValue,
-        ServiceType.appleDictionary.rawValue,
+        ServiceType.mDict.rawValue,
     ]
 
     /// Raw dictionary backing service query statistics.
@@ -436,26 +327,17 @@ final class LocalStorage: NSObject {
         let allWindowTypes: [EZWindowType] = [.mini, .fixed, .main]
 
         for windowType in allWindowTypes {
-            let serviceTypeIds = allServiceTypes(windowType)
+            for serviceTypeId in allServiceTypes(windowType) {
+                let type = ServiceType(rawValue: serviceTypeId)
+                guard serviceInfo(withType: type, windowType: windowType) == nil else { continue }
 
-            for serviceTypeId in serviceTypeIds {
-                let components = serviceIdentifierComponents(from: serviceTypeId)
-                let rawType = components.rawType
-                let uuid = components.uuid
-                let baseType = ServiceType(rawValue: rawType)
-
-                if serviceInfo(withType: baseType, serviceId: uuid, windowType: windowType) == nil {
-                    let serviceInfo = QueryServiceConfiguration(
-                        uuid: uuid,
-                        type: baseType,
-                        enabled: true,
-                        enabledQuery: queryCount == 0,
-                        windowType: windowType
-                    )
-
-                    serviceInfo.enabled = defaultServiceTypeIDs.contains(rawType)
-                    setServiceInfo(serviceInfo, windowType: windowType)
-                }
+                let serviceInfo = QueryServiceConfiguration(
+                    type: type,
+                    enabled: defaultEnabledServiceTypeIDs.contains(serviceTypeId),
+                    enabledQuery: queryCount == 0,
+                    windowType: windowType
+                )
+                setServiceInfo(serviceInfo, windowType: windowType)
             }
         }
     }
@@ -465,84 +347,10 @@ final class LocalStorage: NSObject {
     ///   - service: Service to update.
     ///   - windowType: Window the service belongs to.
     private func updateServiceInfo(_ service: QueryService, windowType: EZWindowType) {
-        let info = serviceInfo(withType: service.serviceType(), serviceId: service.uuid, windowType: windowType)
+        let info = serviceInfo(withType: service.serviceType(), windowType: windowType)
         service.enabled = info?.enabled ?? true
         service.enabledQuery = info?.enabledQuery ?? true
         service.windowType = windowType
-        service.uuid = info?.uuid ?? service.uuid
-    }
-
-    /// Builds the UserDefaults key for a service instance.
-    /// - Parameters:
-    ///   - serviceType: Base service type.
-    ///   - serviceId: Unique service identifier.
-    ///   - windowType: Window scope.
-    /// - Returns: Namespaced storage key.
-    private func key(forServiceType serviceType: ServiceType, serviceId: String, windowType: EZWindowType) -> String {
-        let baseType = baseServiceType(from: serviceType).rawValue
-        if serviceId.isEmpty {
-            return "\(Constants.serviceInfoStorageKey)-\(baseType)-\(windowType.rawValue)"
-        }
-        return "\(Constants.serviceInfoStorageKey)-\(baseType)-\(serviceId)-\(windowType.rawValue)"
-    }
-
-    /// Builds the UserDefaults key for persisted service order.
-    /// - Parameter windowType: Window scope.
-    /// - Returns: Namespaced storage key.
-    private func serviceTypesKey(of windowType: EZWindowType) -> String {
-        "\(Constants.allServiceTypesKey)-\(windowType.rawValue)"
-    }
-
-    private func ensureServiceInfoForAddition(metadata: QueryServiceMetadata, windowType: EZWindowType) {
-        guard serviceInfo(
-            withType: metadata.serviceType,
-            serviceId: metadata.uuid,
-            windowType: windowType
-        ) == nil else {
-            return
-        }
-
-        // A newly added service should join queries once the user enables it.
-        // Existing records return above and keep their persisted query setting.
-        let serviceInfo = QueryServiceConfiguration(
-            uuid: metadata.uuid,
-            type: metadata.serviceType,
-            enabled: false,
-            enabledQuery: true,
-            windowType: windowType
-        )
-        setServiceInfo(serviceInfo, windowType: windowType)
-    }
-
-    private func serviceIdentifierComponents(from serviceTypeId: String)
-        -> (rawType: String, uuid: String) {
-        let components = serviceTypeId.split(
-            separator: "#",
-            maxSplits: 1,
-            omittingEmptySubsequences: false
-        )
-        let rawType = String(components.first ?? Substring(serviceTypeId))
-        let uuid = components.count > 1 ? String(components[1]) : ""
-        return (rawType, uuid)
-    }
-
-    private func containsServiceType(
-        _ serviceTypeId: String,
-        in serviceTypeIds: [String],
-        metadata: QueryServiceMetadata
-    )
-        -> Bool {
-        let components = serviceIdentifierComponents(from: serviceTypeId)
-
-        return serviceTypeIds.contains { existingTypeId in
-            if existingTypeId == serviceTypeId {
-                return true
-            }
-            guard !metadata.allowsMultipleInstances else {
-                return false
-            }
-            return serviceIdentifierComponents(from: existingTypeId).rawType == components.rawType
-        }
     }
 
     /// Reads or creates a per-service query usage record.
@@ -622,28 +430,15 @@ final class LocalStorage: NSObject {
         return chineseFlag ? titles[clampedLevel - 1] : enTitles[clampedLevel - 1]
     }
 
-    /// Retrieves persisted service info data with backward-compatible keys.
-    /// - Parameters:
-    ///   - type: Service type identifier.
-    ///   - serviceId: Service UUID.
-    ///   - windowType: Window scope.
-    /// - Returns: Stored data when available.
-    private func storedServiceInfoData(type: ServiceType, serviceId: String, windowType: EZWindowType) -> Data? {
-        let baseKey = key(forServiceType: type, serviceId: serviceId, windowType: windowType)
-        return userDefaults.data(forKey: baseKey)
-    }
-
     /// Attempts to decode legacy JSON payloads saved by MJExtension.
     /// - Parameters:
     ///   - data: Raw JSON data.
-    ///   - fallbackType: Service type to use when missing.
-    ///   - serviceId: Service UUID.
+    ///   - type: Service type the data was stored for.
     ///   - windowType: Window scope.
     /// - Returns: Normalized service info when decoding succeeds.
     private func decodeLegacyServiceInfo(
         from data: Data,
-        fallbackType: ServiceType,
-        serviceId: String,
+        type: ServiceType,
         windowType: EZWindowType
     )
         -> QueryServiceConfiguration? {
@@ -651,60 +446,48 @@ final class LocalStorage: NSObject {
             return nil
         }
 
-        let typeRaw = jsonObject["type"] as? String ?? fallbackType.rawValue
-        let legacyUUID = jsonObject["uuid"] as? String ?? serviceId
-        let enabled = jsonObject["enabled"] as? Bool ?? true
-        let enabledQuery = jsonObject["enabledQuery"] as? Bool ?? true
-        let windowValue = jsonObject["windowType"] as? Int ?? windowType.rawValue
-
         let info = QueryServiceConfiguration(
-            uuid: legacyUUID,
-            type: ServiceType(rawValue: typeRaw),
-            enabled: enabled,
-            enabledQuery: enabledQuery,
-            windowType: EZWindowType(rawValue: windowValue) ?? windowType
+            type: type,
+            enabled: jsonObject["enabled"] as? Bool ?? true,
+            enabledQuery: jsonObject["enabledQuery"] as? Bool ?? true,
+            windowType: windowType
         )
-
-        return normalized(info, fallbackType: fallbackType, serviceId: serviceId, windowType: windowType)
+        return normalized(info, type: type, windowType: windowType)
     }
 
-    /// Normalizes service info to ensure base type, window type, and UUID are present.
-    /// - Parameters:
-    ///   - info: Raw service info object.
-    ///   - fallbackType: Service type to apply when missing.
-    ///   - serviceId: Service UUID to apply when missing.
-    ///   - windowType: Window scope to apply.
-    /// - Returns: Normalized service info.
+    /// Returns a copy of `info` stored under `type` and `windowType`.
     private func normalized(
         _ info: QueryServiceConfiguration,
-        fallbackType: ServiceType,
-        serviceId: String,
+        type: ServiceType,
         windowType: EZWindowType
     )
         -> QueryServiceConfiguration {
-        let baseType = baseServiceType(from: info.type)
-        let normalizedUUID = info.uuid.isEmpty ? serviceId : info.uuid
-
-        let normalizedInfo = QueryServiceConfiguration(
-            uuid: normalizedUUID,
-            type: baseType,
+        QueryServiceConfiguration(
+            type: type,
             enabled: info.enabled,
             enabledQuery: info.enabledQuery,
             windowType: windowType
         )
+    }
+}
 
-        return normalizedInfo
+// MARK: - Storage Keys
+
+extension LocalStorage {
+    /// UserDefaults key of a window's ordered service list.
+    static func serviceTypesKey(of windowType: EZWindowType) -> String {
+        "\(Constants.allServiceTypesKey)-\(windowType.rawValue)"
     }
 
-    /// Returns a service type without any duplicated-instance suffix.
-    /// - Parameter serviceType: Service type that may contain a `#uuid` suffix.
-    /// - Returns: Base service type.
-    private func baseServiceType(from serviceType: ServiceType) -> ServiceType {
-        guard let separatorIndex = serviceType.rawValue.firstIndex(of: "#") else {
-            return serviceType
-        }
-        let rawValue = String(serviceType.rawValue[..<separatorIndex])
-        return ServiceType(rawValue: rawValue)
+    /// UserDefaults key of a service's enabled state in a window.
+    static func serviceInfoKey(type: ServiceType, windowType: EZWindowType) -> String {
+        "\(Constants.serviceInfoStorageKey)-\(type.rawValue)-\(windowType.rawValue)"
+    }
+
+    /// Key that older builds used for one instance of a service that could be added several times.
+    /// Only read by `ServiceListMigration`.
+    static func legacyServiceInfoKey(type: ServiceType, instanceID: String, windowType: EZWindowType) -> String {
+        "\(Constants.serviceInfoStorageKey)-\(type.rawValue)-\(instanceID)-\(windowType.rawValue)"
     }
 }
 

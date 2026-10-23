@@ -96,28 +96,20 @@
     };
 }
 
-/// Write key value to NSUserDefaults. easydict://writeKeyValue?EZOpenAIAPIKey=sk-zob
+/// Write key value to NSUserDefaults. easydict://writeKeyValue?IntelligentQueryMode-window1=1
 - (BOOL)writeKeyValues:(NSDictionary *)keyValues {
     BOOL handled = NO;
     for (NSString *key in keyValues) {
         NSString *value = keyValues[key];
         handled = [self enabledReadWriteKey:key];
         if (handled) {
-            MyConfiguration *config = [MyConfiguration shared];
-            BOOL isBeta = config.beta;
-            
             [[NSUserDefaults standardUserDefaults] setObject:value forKey:key];
-            
-            // If enabling beta feature, setup beta features.
-            if (!isBeta && config.beta) {
-                [MyConfiguration.shared enableBetaFeaturesIfNeeded];
-            }
         }
     }
     return handled;
 }
 
-/// Read value of key from NSUserDefaults. easydict://readValueOfKey?EZOpenAIAPIKey
+/// Read value of key from NSUserDefaults. easydict://readValueOfKey?IntelligentQueryMode-window1
 - (nullable NSString *)readValueOfKey:(NSString *)key {
     if ([self enabledReadWriteKey:key]) {
         return [[NSUserDefaults standardUserDefaults] objectForKey:key];
@@ -162,48 +154,11 @@
 /// Return allowed write keys to NSUserDefaults.
 - (NSArray *)allowedReadWriteKeys {
     /**
-     easydict://writeKeyValue?EZBetaFeatureKey=1
-     
-     easydict://writeKeyValue?EZOpenAIAPIKey=sk-zob
-     easydict://writeKeyValue?EZOpenAIServiceUsageStatusKey=1
-     easydict://writeKeyValue?EZOpenAIModelKey=gpt-3.5-turbo
-     easydict://writeKeyValue?EZOpenAIEndPointKey=https://api.ohmygpt.com/azure/v1/chat/completions
-     easydict://writeKeyValue?EZOpenAIDictionaryKey=0
-     easydict://writeKeyValue?EZOpenAISentenceKey=0
-     
-     easydict://writeKeyValue?EZDeepLAuthKey=xxx
-     easydict://writeKeyValue?EZDeepLTranslationAPIKey=1
-     
-     // Youdao TTS
-     easydict://writeKeyValue?EZDefaultTTSServiceKey=Youdao
-     
      // Intelligent Query Mode, enable mini window
      easydict://writeKeyValue?IntelligentQueryMode-window1=1
-     
-     // Intelligent Query
-     easydict://writeKeyValue?Google-IntelligentQueryTextType=5  // translation | sentence
-     easydict://writeKeyValue?Youdao-IntelligentQueryTextType=2  // dictionary
      */
     
     NSArray *readWriteKeys = @[
-        EZBetaFeatureKey,
-        
-        EZDeepLAuthKey,
-        EZDeepLTranslateEndPointKey,
-        EZNiuTransAPIKey,
-        EZCaiyunToken,
-        EZTencentSecretId,
-        EZTencentSecretKey,
-        EZBingCookieKey,
-        
-        EZAliAccessKeyId,
-        EZAliAccessKeySecret,
-        
-        EZVolcanoAccessKeyID,
-        EZVolcanoSecretAccessKey,
-        
-        EZDoubaoAPIKey,
-
         EZIntelligentQueryModeKey,
     ];
     

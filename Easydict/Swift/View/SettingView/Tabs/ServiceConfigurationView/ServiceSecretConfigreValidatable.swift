@@ -44,25 +44,3 @@ extension QueryService: ServiceSecretConfigreValidatable {
         return latestResult
     }
 }
-
-// MARK: - ServiceConfigRemovable
-
-protocol ServiceConfigRemovable {
-    func remove()
-}
-
-// MARK: - QueryService + ServiceConfigRemovable
-
-extension QueryService: ServiceConfigRemovable {
-    func remove() {
-        for winType in [EZWindowType.fixed, EZWindowType.main, EZWindowType.mini] {
-            LocalStorage.shared().removeServiceType(
-                serviceTypeWithUniqueIdentifier(),
-                windowType: winType,
-                allowRemovingLast: true
-            )
-            NotificationCenter.default.postServiceUpdateNotification(windowType: winType)
-        }
-        GlobalContext.shared.reloadLLMServicesSubscribers()
-    }
-}

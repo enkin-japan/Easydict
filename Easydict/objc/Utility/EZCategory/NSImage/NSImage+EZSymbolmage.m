@@ -12,7 +12,7 @@
 @implementation NSImage (EZSymbolmage)
 
 + (NSImage *)ez_imageWithSymbolName:(NSString *)name {
-    CGSize size = CGSizeMake(EZAudioButtonImageWidth_16, EZAudioButtonImageWidth_16);
+    CGSize size = CGSizeMake(EZActionButtonImageWidth_16, EZActionButtonImageWidth_16);
     NSImage *image = [self ez_imageWithSymbolName:name size:size scale:NSImageSymbolScaleSmall];
     return image;
 }

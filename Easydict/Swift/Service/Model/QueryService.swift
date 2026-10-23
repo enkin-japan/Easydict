@@ -14,19 +14,14 @@ import Foundation
 public enum ServiceAPIKeyRequirement: Equatable {
     /// No API key is needed; all requests can be made without authentication.
     case none
-    /// API key is required, but the service provider offers a built-in key for users to use out of the box.
-    case builtIn
     /// API key is required and users must provide their own key to use the service.
     case userProvided
-    /// Service invoked via an AI agent CLI tool (e.g. Claude Code, Codex CLI, Gemini CLI).
-    /// The CLI manages its own credentials; no API key is configured in the app.
-    case agentCLI
 
     // MARK: Internal
 
     /// Whether this service requires an API key for requests.
     var requiresKeyForRequest: Bool {
-        self != .none && self != .agentCLI
+        self != .none
     }
 
     /// Whether this service needs the user to provide an API key.
@@ -49,7 +44,6 @@ open class QueryService: NSObject {
 
     // MARK: Open
 
-    open var uuid: String = ""
     open var enabled: Bool = true
 
     open var queryType: EZQueryTextType = []
@@ -67,7 +61,7 @@ open class QueryService: NSObject {
         didSet {
             guard let result else { return }
 
-            result.serviceTypeWithUniqueIdentifier = serviceTypeWithUniqueIdentifier()
+            result.serviceTypeId = serviceType().rawValue
             result.queryModel = queryModel
             resultDidUpdate(result)
         }
@@ -80,7 +74,6 @@ open class QueryService: NSObject {
             LocalStorage.shared().setEnabledQuery(
                 newValue,
                 serviceType: serviceType(),
-                serviceId: uuid,
                 windowType: windowType
             )
         }
@@ -104,18 +97,6 @@ open class QueryService: NSObject {
             return true
         }
         set { storedEnabledAutoQuery = newValue }
-    }
-
-    open var audioPlayer: EZAudioPlayer! {
-        get {
-            if storedAudioPlayer == nil {
-                let player = EZAudioPlayer()
-                player.service = self
-                storedAudioPlayer = player
-            }
-            return storedAudioPlayer
-        }
-        set { storedAudioPlayer = newValue }
     }
 
     // MARK: - MJExtension
@@ -172,25 +153,11 @@ open class QueryService: NSObject {
         return (false, outcome.result)
     }
 
-    /// Get TTS language code.
-    /// - Parameters:
-    ///   - language: Text language.
-    ///   - accent: English accent, such as en-US, en-GB.
-    open func getTTSLanguageCode(_ language: Language, accent: String?) -> String {
-        var currentLanguage = language
-        if currentLanguage == .classicalChinese {
-            currentLanguage = .simplifiedChinese
-        }
-
-        return languageCode(forLanguage: currentLanguage) ?? ""
-    }
-
     @discardableResult
     open func resetServiceResult() -> QueryResult {
         updateResultLock.lock()
         defer { updateResultLock.unlock() }
         let currentResult = result ?? QueryResult()
-        storedAudioPlayer?.stop()
         // Invalidate any in-flight stream before reusing the same result object.
         resultGeneration += 1
         currentResult.reset()
@@ -274,7 +241,7 @@ open class QueryService: NSObject {
             }
         }
 
-        let serviceType = serviceTypeWithUniqueIdentifier()
+        let serviceType = serviceType().rawValue
         queryModel.setStop({ [weak self] in
             task.cancel()
             guard let self else { return }
@@ -316,10 +283,6 @@ open class QueryService: NSObject {
 
     /// Returns the bundled asset name used to represent this service.
     open func iconName() -> String {
-        serviceType().rawValue
-    }
-
-    open func serviceTypeWithUniqueIdentifier() -> String {
         serviceType().rawValue
     }
 
@@ -418,14 +381,6 @@ open class QueryService: NSObject {
         false
     }
 
-    open func isDuplicatable() -> Bool {
-        false
-    }
-
-    open func isDeletable(_ windowType: EZWindowType) -> Bool {
-        true
-    }
-
     /// Detect the language of the given text.
     @nonobjc
     open func detectText(_ text: String) async throws -> Language {
@@ -452,49 +407,6 @@ open class QueryService: NSObject {
         }
     }
 
-    /// Generate audio for the given text with an optional accent.
-    open func textToAudio(
-        _ text: String,
-        fromLanguage: Language,
-        accent: String? = nil
-    ) async throws
-        -> String? {
-        try await audioPlayer.defaultTTSService.textToAudio(text, fromLanguage: fromLanguage, accent: accent)
-    }
-
-    /// Perform OCR for the given image.
-    open func ocr(
-        _ image: NSImage,
-        from: Language,
-        to: Language
-    ) async throws
-        -> EZOCRResult? {
-        fatalError("You must override \(#function) in a subclass.")
-    }
-
-    /// Perform OCR for the given query model.
-    open func ocr(_ queryModel: QueryModel) async throws -> EZOCRResult? {
-        guard let image = queryModel.ocrImage else {
-            throw QueryError.error(type: .parameter, message: "Image is nil")
-        }
-        return try await ocr(
-            image,
-            from: queryModel.queryFromLanguage,
-            to: queryModel.queryTargetLanguage
-        )
-    }
-
-    /// Perform OCR and translation with an intermediate OCR callback.
-    open func ocrAndTranslate(
-        _ image: NSImage,
-        from: Language,
-        to: Language,
-        ocrSuccess: @escaping (EZOCRResult, Bool) -> ()
-    ) async throws
-        -> (EZOCRResult?, QueryResult?) {
-        fatalError("You must override \(#function) in a subclass.")
-    }
-
     // MARK: Internal
 
     /// Monotonic token used to drop stale stream chunks after result reset.
@@ -513,8 +425,6 @@ open class QueryService: NSObject {
     private var storedEnabledQuery: Bool = true
 
     private var storedEnabledAutoQuery: Bool = true
-
-    private var storedAudioPlayer: EZAudioPlayer?
 
     // MARK: - Language caches
 

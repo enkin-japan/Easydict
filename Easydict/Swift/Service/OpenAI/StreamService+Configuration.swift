@@ -11,10 +11,6 @@ import Foundation
 
 extension StreamService {
     func setupSubscribers() {
-        if let codex = self as? CodexCLIService {
-            codex.setupCodexSubscribers()
-            return
-        }
         logInfo("setup subscribers: \(self), windowType: \(windowType.rawValue)")
 
         Defaults.publisher(nameKey, options: [])
@@ -82,12 +78,9 @@ extension StreamService {
 
     func notifyServiceConfigurationChanged(autoQuery: Bool = false) {
         logInfo("service config changed: \(serviceType().rawValue), windowType: \(windowType.rawValue)")
-        if !uuid.isEmpty {
-            logInfo("service name: \(name()), id: \(serviceTypeWithUniqueIdentifier())")
-        }
 
         NotificationCenter.default.postServiceUpdateNotification(
-            serviceType: serviceTypeWithUniqueIdentifier(),
+            serviceType: serviceType().rawValue,
             windowType: windowType,
             autoQuery: autoQuery
         )
@@ -100,14 +93,14 @@ extension QueryService {
     }
 
     func stringDefaultsKey(_ key: ServiceConfigurationKey, defaultValue: String) -> Defaults.Key<String> {
-        serivceConfigurationKey(key, serviceType: serviceType(), id: uuid, defaultValue: defaultValue)
+        serivceConfigurationKey(key, serviceType: serviceType(), defaultValue: defaultValue)
     }
 
     func boolDefaultsKey(_ key: ServiceConfigurationKey, defaultValue: Bool) -> Defaults.Key<Bool> {
-        serivceConfigurationKey(key, serviceType: serviceType(), id: uuid, defaultValue: defaultValue)
+        serivceConfigurationKey(key, serviceType: serviceType(), defaultValue: defaultValue)
     }
 
     func serviceDefaultsKey<T>(_ key: ServiceConfigurationKey, defaultValue: T) -> Defaults.Key<T> {
-        serivceConfigurationKey(key, serviceType: serviceType(), id: uuid, defaultValue: defaultValue)
+        serivceConfigurationKey(key, serviceType: serviceType(), defaultValue: defaultValue)
     }
 }

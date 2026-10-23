@@ -20,8 +20,7 @@ extension ShortcutManager {
 
     private func setDefaultGlobalShortcutKeys() {
         Defaults[.inputShortcut] = KeyCombo(key: .a, cocoaModifiers: .option)
-        // Slim build: no built-in screenshot. ⌥S translates the clipboard instead
-        // (text, or an image copied from your own screenshot tool → OCR + translate).
+        // Slim build: no built-in screenshot or OCR. ⌥S translates the clipboard text instead.
         Defaults[.pasteboardTranslateShortcut] = KeyCombo(key: .s, cocoaModifiers: .option)
         Defaults[.selectionShortcut] = KeyCombo(key: .d, cocoaModifiers: .option)
         Defaults[.showMiniWindowShortcut] = KeyCombo(key: .f, cocoaModifiers: .option)
@@ -33,7 +32,6 @@ extension ShortcutManager {
         Defaults[.copyShortcut] = KeyCombo(key: .c, cocoaModifiers: [.command, .shift])
         Defaults[.copyFirstResultShortcut] = KeyCombo(key: .j, cocoaModifiers: [.command, .shift])
         Defaults[.focusShortcut] = KeyCombo(key: .i, cocoaModifiers: .command)
-        Defaults[.playShortcut] = KeyCombo(key: .s, cocoaModifiers: .command)
         Defaults[.retryShortcut] = KeyCombo(key: .r, cocoaModifiers: .command)
         Defaults[.toggleShortcut] = KeyCombo(key: .t, cocoaModifiers: .command)
         Defaults[.pinShortcut] = KeyCombo(key: .p, cocoaModifiers: .command)
@@ -42,7 +40,6 @@ extension ShortcutManager {
         Defaults[.decreaseFontSize] = KeyCombo(key: .keypadMinus, cocoaModifiers: .command)
         Defaults[.googleShortcut] = KeyCombo(key: .return, cocoaModifiers: .command)
         Defaults[.eudicShortcut] = KeyCombo(key: .return, cocoaModifiers: [.command, .shift])
-        Defaults[.appleDictionaryShortcut] = KeyCombo(key: .d, cocoaModifiers: [.command, .shift])
     }
 }
 

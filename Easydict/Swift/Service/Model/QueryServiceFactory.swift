@@ -13,11 +13,8 @@ import Foundation
 
 struct QueryServiceMetadata {
     let serviceType: ServiceType
-    let uuid: String
     let title: String
-    let apiKeyRequirement: ServiceAPIKeyRequirement
     let isStream: Bool
-    let allowsMultipleInstances: Bool
 }
 
 // MARK: - ServiceRegistration
@@ -28,15 +25,11 @@ private struct ServiceRegistration {
     init(
         _ serviceType: ServiceType,
         _ serviceClass: QueryService.Type,
-        _ titleKey: String,
-        apiKeyRequirement: ServiceAPIKeyRequirement = .userProvided,
-        allowsMultipleInstances: Bool = false
+        _ titleKey: String
     ) {
         self.serviceType = serviceType
         self.serviceClass = serviceClass
         self.titleKey = titleKey
-        self.apiKeyRequirement = apiKeyRequirement
-        self.allowsMultipleInstances = allowsMultipleInstances
     }
 
     // MARK: Internal
@@ -44,8 +37,6 @@ private struct ServiceRegistration {
     let serviceType: ServiceType
     let serviceClass: QueryService.Type
     let titleKey: String
-    let apiKeyRequirement: ServiceAPIKeyRequirement
-    let allowsMultipleInstances: Bool
 }
 
 // MARK: - QueryServiceFactory
@@ -60,6 +51,7 @@ final class QueryServiceFactory: NSObject {
     /// Shared singleton instance.
     static let shared = QueryServiceFactory()
 
+    /// Every query service, in the default order of a window's service list.
     var allServiceTypes: [ServiceType] {
         serviceRegistrations.map(\.serviceType)
     }
@@ -68,100 +60,50 @@ final class QueryServiceFactory: NSObject {
         allServiceTypes.map(\.rawValue)
     }
 
-    func service(withTypeId typeIdIfHave: String) -> QueryService? {
-        let components = serviceIdentifierComponents(from: typeIdIfHave)
-
-        guard let serviceClass = serviceClass(withTypeId: typeIdIfHave) else {
-            return nil
-        }
-
-        let service = serviceClass.init()
-        service.uuid = components.uuid
-        return service
+    func service(withTypeId typeId: String) -> QueryService? {
+        serviceRegistration(withTypeId: typeId)?.serviceClass.init()
     }
 
     func services(fromTypes types: [String]) -> [QueryService] {
         types.compactMap { service(withTypeId: $0) }
     }
 
-    func isStreamService(typeIdIfHave: String) -> Bool {
-        guard let serviceClass = serviceClass(withTypeId: typeIdIfHave) else {
+    func isStreamService(typeIdIfHave typeId: String) -> Bool {
+        guard let serviceClass = serviceRegistration(withTypeId: typeId)?.serviceClass else {
             return false
         }
         return serviceClass is StreamService.Type
     }
 
-    func metadata(withTypeId typeIdIfHave: String) -> QueryServiceMetadata? {
-        let components = serviceIdentifierComponents(from: typeIdIfHave)
-        guard let registration = serviceRegistration(withTypeId: typeIdIfHave) else { return nil }
+    func metadata(withTypeId typeId: String) -> QueryServiceMetadata? {
+        guard let registration = serviceRegistration(withTypeId: typeId) else { return nil }
 
         return QueryServiceMetadata(
             serviceType: registration.serviceType,
-            uuid: components.uuid,
-            title: title(
-                for: registration.serviceType,
-                uuid: components.uuid,
-                fallbackKey: registration.titleKey
-            ),
-            apiKeyRequirement: registration.apiKeyRequirement,
-            isStream: registration.serviceClass is StreamService.Type,
-            allowsMultipleInstances: registration.allowsMultipleInstances
+            title: title(for: registration),
+            isStream: registration.serviceClass is StreamService.Type
         )
     }
 
     // MARK: Private
 
-    /// Slim build: local / self-hosted services plus the official OpenAI API are registered.
-    /// Other service classes stay in the project (some are shared infrastructure,
-    /// e.g. `AppleService` handles language detection and system TTS) but are not offered.
+    /// Slim build: a fixed set of local services. Every window lists all of them;
+    /// the user can only enable, disable and reorder them.
     private let serviceRegistrations: [ServiceRegistration] = [
-        .init(.appleDictionary, AppleDictionary.self, "apple_dictionary", apiKeyRequirement: .none),
-        .init(.mDict, MDictService.self, "service.mdict.name", apiKeyRequirement: .none),
-        .init(.reading, ReadingService.self, "service.reading.name", apiKeyRequirement: .none),
-        .init(.openAI, OpenAIService.self, "openai_translate"),
-        .init(
-            .customOpenAI,
-            CustomOpenAIService.self,
-            "custom_openai",
-            apiKeyRequirement: .none,
-            allowsMultipleInstances: true
-        ),
+        .init(.reading, ReadingService.self, "service.reading.name"),
+        .init(.mDict, MDictService.self, "service.mdict.name"),
+        .init(.customOpenAI, CustomOpenAIService.self, "custom_openai"),
     ]
 
-    /// Services that can be instantiated by type id (e.g. system TTS via `AppleService`)
-    /// but are never offered as query services in the service list.
-    private let infrastructureRegistrations: [ServiceRegistration] = [
-        .init(.apple, AppleService.self, "apple_translate", apiKeyRequirement: .none),
-    ]
-
-    private func serviceClass(withTypeId typeIdIfHave: String) -> QueryService.Type? {
-        serviceRegistration(withTypeId: typeIdIfHave)?.serviceClass
+    private func serviceRegistration(withTypeId typeId: String) -> ServiceRegistration? {
+        serviceRegistrations.first { $0.serviceType.rawValue == typeId }
     }
 
-    private func serviceRegistration(withTypeId typeIdIfHave: String) -> ServiceRegistration? {
-        let components = serviceIdentifierComponents(from: typeIdIfHave)
-        return serviceRegistrations.first { $0.serviceType.rawValue == components.rawType }
-            ?? infrastructureRegistrations.first { $0.serviceType.rawValue == components.rawType }
-    }
-
-    private func serviceIdentifierComponents(from typeIdIfHave: String)
-        -> (rawType: String, uuid: String) {
-        let components = typeIdIfHave.split(
-            separator: "#",
-            maxSplits: 1,
-            omittingEmptySubsequences: false
-        )
-        let rawType = String(components.first ?? Substring(typeIdIfHave))
-        let uuid = components.count > 1 ? String(components[1]) : ""
-        return (rawType, uuid)
-    }
-
-    private func title(for serviceType: ServiceType, uuid: String, fallbackKey: String) -> String {
-        if serviceType == .customOpenAI {
+    private func title(for registration: ServiceRegistration) -> String {
+        if registration.serviceType == .customOpenAI {
             let nameKey = serivceConfigurationKey(
                 .name,
-                serviceType: serviceType,
-                id: uuid,
+                serviceType: registration.serviceType,
                 defaultValue: ""
             )
             let customName = Defaults[nameKey]
@@ -169,6 +111,6 @@ final class QueryServiceFactory: NSObject {
                 return customName
             }
         }
-        return NSLocalizedString(fallbackKey, comment: "")
+        return NSLocalizedString(registration.titleKey, comment: "")
     }
 }

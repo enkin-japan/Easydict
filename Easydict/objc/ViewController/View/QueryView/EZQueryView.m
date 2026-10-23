@@ -114,7 +114,7 @@ static const NSTimeInterval EZAutoQueryWhenTextChangedDelay = 0.8;
         self.textView.font = [NSFont systemFontOfSize:14 * MyConfiguration.shared.fontSizeRatio];
     }];
     
-    // When programatically setting the text, like auto select text, or OCR text.
+    // When programatically setting the text, like auto select text.
     [textView setUpdateTextBlock:^(NSString * _Nonnull text) {
         mm_strongify(self);
         [self updateInputText:text];
@@ -129,24 +129,6 @@ static const NSTimeInterval EZAutoQueryWhenTextChangedDelay = 0.8;
         make.left.equalTo(textView).offset(10);
         make.height.mas_equalTo(30);
     }];
-    
-    EZAudioButton *audioButton = [[EZAudioButton alloc] init];
-    [self addSubview:audioButton];
-    self.audioButton = audioButton;
-
-    [audioButton setPlayStatus:^(BOOL isPlaying, EZAudioButton *audioButton) {
-        NSString *action = isPlaying ? NSLocalizedString(@"stop_play_audio", nil) : NSLocalizedString(@"play_audio", nil);
-        NSString *shortcut = @"⌘+S";
-        audioButton.toolTip = [NSString stringWithFormat:@"%@, %@", action, shortcut];
-    }];
-
-    [audioButton setPlayAudioBlock:^{
-        mm_strongify(self);
-        if (self.playAudioBlock) {
-            self.playAudioBlock(self.copiedText);
-        }
-    }];
-    audioButton.mas_key = @"queryView_audioButton";
     
     EZCopyButton *textCopyButton = [[EZCopyButton alloc] init];
     [self addSubview:textCopyButton];
@@ -175,8 +157,7 @@ static const NSTimeInterval EZAutoQueryWhenTextChangedDelay = 0.8;
         self.queryModel.needDetectLanguage = NO;
         NSString *text = [[self copiedText] ns_trim];
         
-        // Do not set text language if text is OCR merged text.
-        if (text.length && !self.queryModel.ocrImage) {
+        if (text.length) {
             self.queryModel.specifiedTextLanguageDict[text] = language;
         }
         if (self.selectedLanguageBlock) {
@@ -282,15 +263,10 @@ static const NSTimeInterval EZAutoQueryWhenTextChangedDelay = 0.8;
 - (void)updateConstraints {
     [self updateCustomLayout];
     
-    [self.audioButton mas_remakeConstraints:^(MASConstraintMaker *make) {
-        make.bottom.offset(-EZAudioButtonBottomMargin_4);
-        make.left.offset(EZAudioButtonLeftMargin_6);
-        make.width.height.mas_equalTo(EZAudioButtonWidthHeight_24);
-    }];
-    
     [self.textCopyButton mas_remakeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.audioButton.mas_right).offset(EZAudioButtonRightPadding_1);
-        make.width.height.bottom.equalTo(self.audioButton);
+        make.bottom.offset(-EZActionButtonBottomMargin_4);
+        make.left.offset(EZActionButtonLeftMargin_6);
+        make.width.height.mas_equalTo(EZActionButtonWidthHeight_24);
     }];
     
     [self updateDetectButton];
@@ -298,8 +274,8 @@ static const NSTimeInterval EZAutoQueryWhenTextChangedDelay = 0.8;
     
     [self.scrollView mas_remakeConstraints:^(MASConstraintMaker *make) {
         make.top.left.right.inset(0);
-        // Add a padding to audio button, avoid making users feel that there is still text below that has not been fully displayed.
-        make.bottom.equalTo(self.audioButton.mas_top).offset(-EZAudioButtonInputViewTopPadding_4);
+        // Add a padding to the buttons, avoid making users feel that there is still text below that has not been fully displayed.
+        make.bottom.equalTo(self.textCopyButton.mas_top).offset(-EZActionButtonInputViewTopPadding_4);
         
         CGFloat textViewHeight = [self heightOfTextView];
         make.height.mas_greaterThanOrEqualTo(textViewHeight);
@@ -430,7 +406,7 @@ static const NSTimeInterval EZAutoQueryWhenTextChangedDelay = 0.8;
     // Escape key
     if (commandSelector == @selector(cancelOperation:)) {
 //        MMLogInfo(@"escape: %@", textView);
-        [[EZWindowManager shared] closeWindowOrExitSreenshot];
+        [[EZWindowManager shared] closeFloatingWindow];
         
         return YES;
     }

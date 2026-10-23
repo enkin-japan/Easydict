@@ -217,7 +217,7 @@ Easydict 是一个 macOS 翻译和词典应用，正在进行从 Objective-C 到
 
 1. **EZDetectManager** ✅ - 文本检测管理器
    - 位置: `Swift/Service/Model/DetectManager.swift`
-   - 影响: 语言检测和 OCR 功能
+   - 影响: 语言检测（Slim 版已删除 OCR）
    - 优先级: 高
    - **✅ 已完成迁移到 Swift**
    - **状态**: ✅ 完成

@@ -18,14 +18,14 @@ static CGFloat const EZTitlebarHeight_28 = 28;
 
 static CGFloat const EZLayoutGeometryTolerance_0_5 = 0.5;
 
-static CGFloat const EZAudioButtonWidthHeight_24 = 24;
-static CGFloat const EZAudioButtonImageWidth_16 = 16;
+static CGFloat const EZActionButtonWidthHeight_24 = 24;
+static CGFloat const EZActionButtonImageWidth_16 = 16;
 
-static CGFloat const EZAudioButtonLeftMargin_6 = 6;
-static CGFloat const EZAudioButtonInputViewTopPadding_4 = 4;
+static CGFloat const EZActionButtonLeftMargin_6 = 6;
+static CGFloat const EZActionButtonInputViewTopPadding_4 = 4;
 
-static CGFloat const EZAudioButtonBottomMargin_4 = 4;
-static CGFloat const EZAudioButtonRightPadding_1 = 1;
+static CGFloat const EZActionButtonBottomMargin_4 = 4;
+static CGFloat const EZActionButtonRightPadding_1 = 1;
 
 
 // ???: If value is not 0.2, it seems will block animation, because default animationResizeTime is 0.2 ?

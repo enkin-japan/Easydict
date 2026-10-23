@@ -16,22 +16,6 @@ import Foundation
 /// completion-handler generation.
 @objcMembers
 class AppleScriptTask: NSObject {
-    /// Runs the Apple Translation shortcut through the unified `NSAppleScript` backend.
-    ///
-    /// The script template targets `Shortcuts Events`, but execution still goes through the
-    /// shared business runner so Objective-C and Swift callers observe the same timeout and
-    /// error behavior.
-    ///
-    /// - Parameter parameters: Shortcut input parameters encoded as key-value pairs.
-    /// - Returns: The translated text returned by the shortcut, if any.
-    /// - Throws: `QueryError` when script execution fails.
-    static func runTranslateShortcut(parameters: [String: String]) async throws -> String? {
-        let appleScript = appleScript(
-            of: AppConstants.translateShortcutName, parameters: parameters
-        )
-        return try await runAppleScript(appleScript)
-    }
-
     /// Run AppleScript with timeout control
     /// - Parameters:
     ///   - appleScript: The AppleScript to execute

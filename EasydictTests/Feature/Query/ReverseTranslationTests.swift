@@ -34,7 +34,6 @@ struct ReverseTranslationTests {
             #expect(model.userSourceLanguage == .simplifiedChinese)
             #expect(model.userTargetLanguage == .japanese)
             #expect(model.queryTargetLanguage == .japanese)
-            #expect(model.ocrImage == nil)
             #expect(model.actionType == .inputQuery)
             #expect(service.result.translatedText == "你好")
         }
@@ -69,8 +68,7 @@ struct ReverseTranslationTests {
             #expect(model.inputText == "こんにちは")
             #expect(model.userSourceLanguage == .simplifiedChinese)
             #expect(model.userTargetLanguage == .auto)
-            #expect(model.ocrImage != nil)
-            #expect(model.actionType == .ocrQuery)
+            #expect(model.actionType == .shortcutQuery)
         }
     }
 
@@ -89,8 +87,7 @@ struct ReverseTranslationTests {
             #expect(model.inputText == "こんにちは")
             #expect(model.userSourceLanguage == .simplifiedChinese)
             #expect(model.userTargetLanguage == .auto)
-            #expect(model.ocrImage != nil)
-            #expect(model.actionType == .ocrQuery)
+            #expect(model.actionType == .shortcutQuery)
         }
     }
 
@@ -129,7 +126,6 @@ struct ReverseTranslationTests {
         #expect(model.userTargetLanguage == .japanese)
         #expect(config.fromLanguage == .simplifiedChinese)
         #expect(config.toLanguage == .japanese)
-        #expect(model.ocrImage == nil)
         #expect(model.actionType == .inputQuery)
     }
 
@@ -146,7 +142,6 @@ struct ReverseTranslationTests {
                 queryCount += 1
                 #expect(text == "你好")
                 #expect(action == .inputQuery)
-                #expect(model.ocrImage == nil)
                 #expect(model.userSourceLanguage == .auto)
                 #expect(model.userTargetLanguage == .auto)
             }) {
@@ -181,8 +176,7 @@ struct ReverseTranslationTests {
             #expect(model.inputText == "こんにちは")
             #expect(model.userSourceLanguage == .auto)
             #expect(model.userTargetLanguage == .auto)
-            #expect(model.ocrImage != nil)
-            #expect(model.actionType == .ocrQuery)
+            #expect(model.actionType == .shortcutQuery)
             #expect(MyConfiguration.shared.fromLanguage == .auto)
             #expect(MyConfiguration.shared.toLanguage == .auto)
         }
@@ -291,8 +285,7 @@ struct ReverseTranslationTests {
         controller.setValue(model, forKey: "queryModel")
         controller.setValue("こんにちは", forKey: "inputText")
         model.detectedLanguage = .japanese
-        model.actionType = .ocrQuery
-        model.ocrImage = NSImage(size: NSSize(width: 1, height: 1))
+        model.actionType = .shortcutQuery
         cell.setValue(model, forKey: "queryModel")
         let query: @convention(block) (NSString, NSString) -> () = { from, to in
             model.userSourceLanguage = Language(rawValue: from as String)

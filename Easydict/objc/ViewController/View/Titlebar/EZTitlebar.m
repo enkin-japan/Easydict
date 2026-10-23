@@ -18,7 +18,6 @@
 typedef NS_ENUM(NSInteger, EZTitlebarButtonType) {
     EZTitlebarButtonTypePin = 0,
     EZTitlebarButtonTypeGoogle,
-    EZTitlebarButtonTypeAppleDic,
     EZTitlebarButtonTypeEudicDic,
 };
 
@@ -285,15 +284,6 @@ typedef NS_ENUM(NSInteger, EZTitlebarButtonType) {
     return _googleButton;
 }
 
-- (EZOpenLinkButton *)appleDictionaryButton {
-    if (!_appleDictionaryButton) {
-        _appleDictionaryButton = [self createButtonWithLink:EZAppleDictionaryAppURLScheme 
-                                                  imageName:EZServiceTypeAppleDictionary
-                                                 buttonType:EZTitlebarButtonTypeAppleDic];
-    }
-    return _appleDictionaryButton;
-}
-
 - (EZOpenLinkButton *)eudicButton {
     if (!_eudicButton) {
         _eudicButton = [self createButtonWithLink:EZEudicAppURLScheme 
@@ -321,11 +311,6 @@ typedef NS_ENUM(NSInteger, EZTitlebarButtonType) {
     // Google
     if (MyConfiguration.shared.showGoogleQuickLink) {
         [shortcutButtonTypes addObject:@(EZTitlebarButtonTypeGoogle)];
-    }
-    
-    // Apple Dictionary
-    if (MyConfiguration.shared.showAppleDictionaryQuickLink) {
-        [shortcutButtonTypes addObject:@(EZTitlebarButtonTypeAppleDic)];
     }
     
     // Eudic
@@ -364,10 +349,6 @@ typedef NS_ENUM(NSInteger, EZTitlebarButtonType) {
             button = self.googleButton;
             break;
         }
-        case EZTitlebarButtonTypeAppleDic: {
-            button = self.appleDictionaryButton;
-            break;
-        }
         case EZTitlebarButtonTypeEudicDic: {
             button = self.eudicButton;
             break;
@@ -390,9 +371,6 @@ typedef NS_ENUM(NSInteger, EZTitlebarButtonType) {
     } else if (type == EZTitlebarButtonTypeGoogle) {
         shortcutStr = MyConfiguration.shared.googleShortcutString;
         hint = NSLocalizedString(@"open_in_google", nil);
-    } else if (type == EZTitlebarButtonTypeAppleDic) {
-        shortcutStr = MyConfiguration.shared.appleDictShortcutString;
-        hint = NSLocalizedString(@"open_in_apple_dictionary", nil);
     } else if (type == EZTitlebarButtonTypeEudicDic) {
         shortcutStr = MyConfiguration.shared.eudicDictShortcutString;
         hint = NSLocalizedString(@"open_in_eudic", nil);

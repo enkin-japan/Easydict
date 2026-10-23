@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Easydict 是一款 macOS 词典和翻译应用，支持查词、文本翻译、划词翻译和 OCR 截图翻译。
+Easydict 是一款 macOS 词典和翻译应用，支持查词、文本翻译和划词翻译。
 
 `AGENTS.md` 是 Agent 的唯一任务入口；详细规则只在对应专题文档维护。
 

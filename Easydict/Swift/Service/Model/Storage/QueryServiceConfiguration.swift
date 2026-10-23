@@ -13,13 +13,11 @@ final class QueryServiceConfiguration: NSObject, Codable {
 
     /// Creates a new service info instance.
     init(
-        uuid: String = "",
         type: ServiceType,
         enabled: Bool = true,
         enabledQuery: Bool = true,
         windowType: EZWindowType = .main
     ) {
-        self.uuid = uuid
         self.type = type
         self.enabled = enabled
         self.enabledQuery = enabledQuery
@@ -31,12 +29,9 @@ final class QueryServiceConfiguration: NSObject, Codable {
     /// - Parameter decoder: Decoder providing stored values.
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let decodedType = try container.decodeIfPresent(String.self, forKey: .type) ?? ServiceType.appleDictionary
-            .rawValue
-        let decodedUUID = try container.decodeIfPresent(String.self, forKey: .uuid) ?? ""
+        let decodedType = try container.decodeIfPresent(String.self, forKey: .type) ?? ServiceType.mDict.rawValue
         let windowTypeValue = try container.decodeIfPresent(Int.self, forKey: .windowType) ?? EZWindowType.main.rawValue
 
-        self.uuid = decodedUUID
         self.type = ServiceType(rawValue: decodedType)
         self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
         self.enabledQuery = try container.decodeIfPresent(Bool.self, forKey: .enabledQuery) ?? true
@@ -46,10 +41,7 @@ final class QueryServiceConfiguration: NSObject, Codable {
 
     // MARK: Internal
 
-    /// Identifier for distinguishing duplicated services.
-    var uuid: String
-
-    /// Service type identifier (may include legacy `#uuid` suffix in stored data).
+    /// Service type identifier.
     var type: ServiceType
 
     /// Whether the service is enabled on the settings page.
@@ -67,7 +59,6 @@ final class QueryServiceConfiguration: NSObject, Codable {
     @objc(serviceInfoWithService:)
     static func serviceInfo(with service: QueryService) -> QueryServiceConfiguration {
         QueryServiceConfiguration(
-            uuid: service.uuid,
             type: service.serviceType(),
             enabled: service.enabled,
             enabledQuery: service.enabledQuery,
@@ -79,7 +70,6 @@ final class QueryServiceConfiguration: NSObject, Codable {
     /// - Parameter encoder: Encoder used for serialization.
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(uuid, forKey: .uuid)
         try container.encode(type.rawValue, forKey: .type)
         try container.encode(enabled, forKey: .enabled)
         try container.encode(enabledQuery, forKey: .enabledQuery)
@@ -91,7 +81,6 @@ final class QueryServiceConfiguration: NSObject, Codable {
     // MARK: Codable
 
     private enum CodingKeys: String, CodingKey {
-        case uuid
         case type
         case enabled
         case enabledQuery

@@ -22,47 +22,7 @@ struct AdvancedTab: View {
 
     var body: some View {
         Form {
-            Section {
-                Toggle(isOn: $enableBetaFeature) {
-                    AdvancedTabItemView(
-                        color: .blue,
-                        icon: .hammerFill,
-                        labelText: "setting.advance.enable_beta_feature"
-                    )
-                }
-            }
-
             // Items image color order: blue, green, orange, purple, red, mint, yellow, cyan, indigo
-
-            AdvancedTabSpeechSection()
-
-            // General settings section
-            Section {
-                LabeledContent {
-                    TextField(
-                        text: $minClassicalChineseTextDetectLength,
-                        prompt: Text(verbatim: "\(AppConstants.minClassicalChineseLength)")
-                    ) {
-                        EmptyView()
-                    }
-                    .frame(width: 100)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .onChange(of: minClassicalChineseTextDetectLength) { newValue in
-                        minClassicalChineseTextDetectLength = newValue.filter { $0.isNumber }
-                        logInfo(
-                            "Min classical Chinese text detect length: \(minClassicalChineseTextDetectLength)"
-                        )
-                    }
-                } label: {
-                    AdvancedTabItemView(
-                        color: .purple,
-                        icon: .book,
-                        labelText: "setting.advance.min_classical_chinese_text_detect_length"
-                    )
-                }
-            } header: {
-                Text("setting.advance.header.general_settings")
-            }
 
             // Mouse query icon
             Section {
@@ -216,30 +176,6 @@ struct AdvancedTab: View {
                 }
             }
 
-            // OCR settings section
-            Section {
-                Toggle(isOn: $enableOCRTextNormalization) {
-                    AdvancedTabItemView(
-                        color: .green,
-                        icon: .docViewfinder,
-                        labelText: "setting.advance.enable_ocr_text_normalization",
-                        subtitleText: "setting.advance.enable_ocr_text_normalization_desc"
-                    )
-                }
-
-                Toggle(isOn: $showOCRMenuItems) {
-                    AdvancedTabItemView(
-                        color: .orange,
-                        icon: .textAndCommandMacwindow,
-                        labelText: "setting.advance.show_ocr_menu_items",
-                        subtitleText: "setting.advance.show_ocr_menu_items_desc"
-                    )
-                }
-
-            } header: {
-                Text("setting.advance.header.ocr_settings")
-            }
-
             // Windows management
             Section {
                 Picker(
@@ -380,12 +316,7 @@ struct AdvancedTab: View {
 
     // MARK: Private
 
-    @Default(.enableBetaFeature) private var enableBetaFeature
-
     @Default(.enableCompatibilityReplace) private var enableCompatibilityReplace
-    @Default(.minClassicalChineseTextDetectLength) private var minClassicalChineseTextDetectLength
-    @Default(.enableOCRTextNormalization) private var enableOCRTextNormalization
-    @Default(.showOCRMenuItems) private var showOCRMenuItems
     @Default(.autoSelectAllTextFieldText) private var autoSelectAllTextFieldText
 
     // Force get selected text

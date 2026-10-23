@@ -47,17 +47,4 @@ final class AppConstants: NSObject {
     /// `OpenAIStreamTransport`, the non-streaming fallback, and DeepSeek's
     /// hand-built stream; regular translation APIs remain at 15 seconds.
     static let llmRequestTimeoutInterval: TimeInterval = 60
-
-    /// Mobile browser user agent for web translation APIs.
-    static let userAgent =
-        "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) "
-            + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
-
-    // MARK: - Query
-
-    /// Easydict translate shortcut name.
-    static let translateShortcutName = "Easydict-Translate-V1.2.0"
-
-    /// Minimum length for classical Chinese text detection, default is 20
-    static let minClassicalChineseLength = 20
 }

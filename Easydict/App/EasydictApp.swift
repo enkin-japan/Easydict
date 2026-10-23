@@ -17,7 +17,6 @@ import SwiftUI
 enum EasydictCmpatibilityEntry {
     static func main() {
         AppPathMigration.prepareForLaunch()
-        OllamaServiceMigration.migrateIfNeeded()
         parseArmguments()
 
         // Capturing crash logs must be placed first.
@@ -42,10 +41,6 @@ enum EasydictCmpatibilityEntry {
                 defaults: ["NSAutoFillHeuristicsEnabled": false]
             )
         }
-
-        // Move the one-time Vision OCR network compilation off the first user query.
-        // See `AppleOCREngine+WarmUp.swift` for why a cold cache costs 60–120 seconds.
-        AppleOCREngine.warmUpVisionOCRIfNeeded()
 
         // app launch
         EasydictApp.main()

@@ -13,33 +13,9 @@ extension AppPathManager {
         appSupportDirectory.appendingPathComponent("logs", isDirectory: true)
     }
 
-    /// The root directory for app, crash, and OCR diagnostic logs.
+    /// The root directory for app and crash logs.
     var appLogDirectory: URL {
         logsDirectory.appendingPathComponent("app", isDirectory: true)
-    }
-
-    var ocrImageDirectory: URL {
-        appLogDirectory.appendingPathComponent("Image", isDirectory: true)
-    }
-
-    var snipImageFileURL: URL {
-        ocrImageDirectory.appendingPathComponent("snip_image.png", isDirectory: false)
-    }
-
-    var ocrCroppedImageFileURL: URL {
-        ocrImageDirectory.appendingPathComponent("ocr_cropped_image.png", isDirectory: false)
-    }
-
-    var codexCLILogDirectory: URL {
-        logsDirectory.appendingPathComponent("codex-cli", isDirectory: true)
-    }
-
-    var claudeCodeLogDirectory: URL {
-        logsDirectory.appendingPathComponent("claude-code", isDirectory: true)
-    }
-
-    var githubCopilotLogDirectory: URL {
-        logsDirectory.appendingPathComponent("github-copilot", isDirectory: true)
     }
 
     /// The previous CocoaLumberjack-compatible log root.

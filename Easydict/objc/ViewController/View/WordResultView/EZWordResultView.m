@@ -19,10 +19,8 @@
 #import "NSImage+EZResize.h"
 #import "EZBlueTextButton.h"
 #import "EZMyLabel.h"
-#import "EZAudioButton.h"
 #import "EZCopyButton.h"
 #import "NSImage+EZSymbolmage.h"
-#import "TTTDictionary.h"
 #import "EZEnumTypes.h"
 #import "EZReplaceTextButton.h"
 #import "EZSymbolImageButton.h"
@@ -37,7 +35,6 @@ static const CGFloat kVerticalMargin_12 = 12;
 static const CGFloat kVerticalPadding_6 = 6;
 static const CGFloat kBlueTextButtonVerticalPadding_2 = 2;
 
-static NSString *const kAppleDictionaryURIScheme = @"x-dictionary";
 static NSString *const kMDictEntryURIScheme = @"mdict-entry";
 
 static BOOL EZStringHasText(NSString *text) {
@@ -278,11 +275,6 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
                 resultLabel.font = [NSFont systemFontOfSize:14 * self.fontSizeRatio];
                 [self addSubview:resultLabel];
 
-                // OpenAI result text has its own paragraph style.
-                if ([result.serviceTypeWithUniqueIdentifier isEqualToString:EZServiceTypeOpenAI]) {
-                    resultLabel.paragraphSpacing = 0;
-                }
-
                 resultLabel.text = text;
                 resultLabel.delegate = self;
 
@@ -421,23 +413,6 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
                 phoneticLabel.mas_key = @"phoneticLabel";
             }
-
-            EZAudioButton *audioButton = [[EZAudioButton alloc] init];
-            [self addSubview:audioButton];
-
-            EZAudioPlayer *audioPlayer = [[EZAudioPlayer alloc] init];
-            audioButton.audioPlayer = audioPlayer;
-            [audioButton setPlayAudioBlock:^{
-                [audioPlayer playWordPhonetic:obj designatedService:self.service];
-            }];
-
-            [audioButton mas_makeConstraints:^(MASConstraintMaker *make) {
-                NSView *leftView = phoneticLabel ?: phoneticTagLabel;
-                make.left.equalTo(leftView.mas_right).offset(5);
-                make.centerY.equalTo(phoneticLabel ?: phoneticTagLabel);
-                make.width.height.mas_equalTo(23);
-            }];
-            audioButton.mas_key = @"audioButton_phonetics";
         }];
 
         __block NSScrollView *tagScrollView = nil;
@@ -877,50 +852,7 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
 /// Setup bottom tool bar buttons.
 - (void)setupBottomToolBarButtons:(EZQueryResult *)result lastView:(NSView *)lastView height:(CGFloat)height {
-    EZAudioButton *audioButton = [[EZAudioButton alloc] init];
-    [self addSubview:audioButton];
-
     BOOL hasTranslatedText = result.translatedText.length > 0;
-    audioButton.enabled = hasTranslatedText;
-
-    audioButton.audioPlayer = self.service.audioPlayer;
-
-    [audioButton setPlayStatus:^(BOOL isPlaying, EZAudioButton *audioButton) {
-        NSString *action = isPlaying ? NSLocalizedString(@"stop_play_audio", nil) : NSLocalizedString(@"play_audio", nil);
-        audioButton.toolTip = [NSString stringWithFormat:@"%@", action];
-    }];
-
-    [audioButton setPlayAudioBlock:^{
-        NSString *text = result.copiedText;
-
-        // For some special case, copied text language is not the queryTargetLanguage, like 龘, Youdao translate.
-        EZLanguage language = [EZAppleService.shared detectTextSync:text];
-        if ([result.serviceTypeWithUniqueIdentifier isEqualToString:EZServiceTypeOpenAI]) {
-            language = result.to;
-        }
-
-        EZServiceType defaultTTSServiceType = MyConfiguration.shared.defaultTTSServiceType;
-        EZQueryService *defaultTTSService = [QueryServiceFactory.shared serviceWithTypeId:defaultTTSServiceType];
-
-        // Determine accent based on user preference if language is English
-        NSString *accentToUse = nil;
-        if ([language isEqualToString:EZLanguageEnglish]) {
-            // Assuming EnglishPronunciationUk is accessible, similar to EZBaseQueryViewController
-            if (MyConfiguration.shared.pronunciation == EnglishPronunciationUk) {
-                accentToUse = @"uk";
-            } else {
-                accentToUse = @"us";
-            }
-        }
-
-        [self.service.audioPlayer playTextAudio:text
-                                       language:language
-                                         accent:accentToUse // Use determined accent
-                                       audioURL:nil
-                              designatedService:defaultTTSService];
-    }];
-
-    audioButton.mas_key = @"result_audioButton";
 
     EZCopyButton *textCopyButton = [[EZCopyButton alloc] init];
     [self addSubview:textCopyButton];
@@ -932,33 +864,28 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
     }];
     textCopyButton.mas_key = @"result_copyButton";
 
-    CGFloat audioButtonLeftOffset = EZAudioButtonLeftMargin_6;
-    CGFloat audioButtonTopOffset = 6;
-    CGFloat buttonPadding = EZAudioButtonRightPadding_1;
+    CGFloat buttonLeftOffset = EZActionButtonLeftMargin_6;
+    CGFloat buttonTopOffset = 6;
+    CGFloat buttonPadding = EZActionButtonRightPadding_1;
 
-    [audioButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    [textCopyButton mas_makeConstraints:^(MASConstraintMaker *make) {
         if (lastView) {
-            make.top.equalTo(lastView.mas_bottom).offset(audioButtonTopOffset);
+            make.top.equalTo(lastView.mas_bottom).offset(buttonTopOffset);
         } else {
-            make.top.equalTo(self).offset(audioButtonTopOffset);
+            make.top.equalTo(self).offset(buttonTopOffset);
         }
 
-        make.left.offset(audioButtonLeftOffset);
-        make.width.height.mas_equalTo(EZAudioButtonWidthHeight_24);
+        make.left.offset(buttonLeftOffset);
+        make.width.height.mas_equalTo(EZActionButtonWidthHeight_24);
     }];
-    lastView = audioButton;
+    lastView = textCopyButton;
 
-    self.bottomViewHeight = audioButtonTopOffset + EZAudioButtonWidthHeight_24 + EZAudioButtonBottomMargin_4;
+    self.bottomViewHeight = buttonTopOffset + EZActionButtonWidthHeight_24 + EZActionButtonBottomMargin_4;
 
     height += self.bottomViewHeight;
     _viewHeight = height;
     //    MMLogInfo(@"word result view height: %.1f", height);
 
-
-    [textCopyButton mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(audioButton.mas_right).offset(buttonPadding);
-        make.width.height.bottom.equalTo(audioButton);
-    }];
 
     EZOpenLinkButton *linkButton = [[EZOpenLinkButton alloc] init];
     [self addSubview:linkButton];
@@ -966,11 +893,7 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
     NSImage *linkImage = [NSImage ez_imageWithSymbolName:@"link"];
     linkButton.image = linkImage;
 
-    NSString *toolTip = NSLocalizedString(@"open_web_link", nil);
-    if (result.serviceTypeWithUniqueIdentifier == EZServiceTypeAppleDictionary) {
-        toolTip = NSLocalizedString(@"open_in_apple_dictionary", nil);
-    }
-    linkButton.toolTip = toolTip;
+    linkButton.toolTip = NSLocalizedString(@"open_web_link", nil);
 
     linkButton.link = [self.service wordLink:result.queryModel];
 
@@ -983,7 +906,7 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
     [linkButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(textCopyButton.mas_right).offset(buttonPadding);
-        make.width.height.bottom.equalTo(audioButton);
+        make.width.height.bottom.equalTo(textCopyButton);
     }];
 
     EZReplaceTextButton *replaceTextButton = [[EZReplaceTextButton alloc] init];
@@ -1004,7 +927,7 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
     [replaceTextButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(linkButton.mas_right).offset(buttonPadding);
-        make.width.height.bottom.equalTo(audioButton);
+        make.width.height.bottom.equalTo(textCopyButton);
     }];
 
     NSView *rightmostButton = result.showReplaceButton ? (NSView *)replaceTextButton : (NSView *)linkButton;
@@ -1037,7 +960,7 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
         [ankiButton mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(rightmostButton.mas_right).offset(buttonPadding);
-            make.width.height.bottom.equalTo(audioButton);
+            make.width.height.bottom.equalTo(textCopyButton);
         }];
 
         rightmostButton = ankiButton;
@@ -1071,7 +994,7 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 
         [markdownToggleButton mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(rightmostButton.mas_right).offset(buttonPadding);
-            make.width.height.bottom.equalTo(audioButton);
+            make.width.height.bottom.equalTo(textCopyButton);
         }];
     }
 
@@ -1266,31 +1189,6 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     NSURL *navigationActionURL = navigationAction.request.URL;
     //    MMLogInfo(@"decidePolicyForNavigationAction URL: %@", navigationActionURL);
-
-    /**
-     If URL has a prefix "x-dictionary", means this is a Apple Dictionary URI scheme. Docs: https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/DictionaryServicesProgGuide/schema/schema.html
-
-     x-dictionary:r:m_en_gbus0793530:com.apple.dictionary.NOAD:poikilotherm
-     x-dictionary:r:z_DWS-004175:com.apple.dictionary.zh_CN-en.OCD
-     */
-    if ([navigationActionURL.scheme isEqualToString:kAppleDictionaryURIScheme]) {
-        MMLogInfo(@"Open URI: %@", navigationActionURL);
-
-        NSString *hrefText = [navigationActionURL.absoluteString ns_decode];
-
-        [self getTextWithHref:hrefText completionHandler:^(NSString *text) {
-            MMLogInfo(@"URL text is: %@", text);
-
-            if (self.queryTextBlock) {
-                self.queryTextBlock([text  ns_trim]);
-            }
-        }];
-
-        //        [[NSWorkspace sharedWorkspace] openURL:navigationActionURL];
-
-        decisionHandler(WKNavigationActionPolicyCancel);
-        return;
-    }
 
     if ([navigationActionURL.scheme isEqualToString:kMDictEntryURIScheme]) {
         NSString *targetText = navigationActionURL.resourceSpecifier ?: @"";
@@ -1532,29 +1430,6 @@ static BOOL EZResultHasAnkiContent(EZQueryResult *result) {
             if (completionHandler) {
                 completionHandler(result);
             }
-        }
-    }];
-}
-
-- (void)getTextWithHref:(NSString *)href completionHandler:(void (^_Nullable)(NSString *text))completionHandler {
-    NSString *jsCode = [NSString stringWithFormat:
-                        @"var iframes = document.querySelectorAll('iframe');"
-                        @"var linkText = '';"
-                        @"for (var i = 0; i < iframes.length; i++) {"
-                        @"    var iframe = iframes[i];"
-                        @"    var linkElement = iframe.contentWindow.document.querySelector('a[href=\"%@\"]');"
-                        @"    if (linkElement) {"
-                        @"        linkText = linkElement.innerText;"
-                        @"        break;"
-                        @"    }"
-                        @"}"
-                        @"linkText;",
-                        href];
-
-    [self evaluateJavaScript:jsCode completionHandler:^(id result, NSError *error) {
-        if (!error) {
-            NSString *linkText = (NSString *)result;
-            completionHandler(linkText);
         }
     }];
 }

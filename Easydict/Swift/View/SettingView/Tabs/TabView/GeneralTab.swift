@@ -39,26 +39,14 @@ struct GeneralTab: View {
 
             Section {
                 Toggle("auto_query_selected_text", isOn: $autoQuerySelectedText)
-                Toggle("auto_query_ocr_text", isOn: $autoQueryOCRText)
                 Toggle("auto_query_pasted_text", isOn: $autoQueryPastedText)
                 Toggle("auto_query_when_text_changed", isOn: $autoQueryWhenTextChanged)
-                Toggle("setting.general.voice.auto_play_word_audio", isOn: $autoPlayAudio)
-                Picker(
-                    "setting.general.voice.english_pronunciation",
-                    selection: $pronunciation
-                ) {
-                    ForEach(EnglishPronunciation.allCases, id: \.rawValue) { option in
-                        Text(option.localizedStringResource)
-                            .tag(option)
-                    }
-                }
             } header: {
                 Text("setting.general.auto_query.header")
             }
 
             Section {
                 Toggle("auto_copy_selected_text", isOn: $autoCopySelectedText)
-                Toggle("auto_copy_ocr_text", isOn: $autoCopyOCRText)
                 Toggle("auto_copy_first_translated_text", isOn: $autoCopyFirstTranslatedText)
             } header: {
                 Text("setting.general.auto_copy.header")
@@ -67,7 +55,6 @@ struct GeneralTab: View {
             Section {
                 Toggle("show_google_quick_link", isOn: $showGoogleQuickLink)
                 Toggle("show_eudic_quick_link", isOn: $showEudicQuickLink)
-                Toggle("show_apple_dictionary_quick_link", isOn: $showAppleDictionaryQuickLink)
                 Toggle("show_setting_quick_link", isOn: $showQuickActionButton)
             } header: {
                 Text("setting.general.quick_link.header")
@@ -206,22 +193,17 @@ struct GeneralTab: View {
     @Default(.selectQueryTextWhenWindowActivate) private var selectQueryTextWhenWindowActivate
 
     // Auto query
-    @Default(.autoQueryOCRText) private var autoQueryOCRText
     @Default(.autoQuerySelectedText) private var autoQuerySelectedText
     @Default(.autoQueryPastedText) private var autoQueryPastedText
     @Default(.autoQueryWhenTextChanged) private var autoQueryWhenTextChanged
-    @Default(.autoPlayAudio) private var autoPlayAudio
-    @Default(.pronunciation) private var pronunciation
 
     // Auto copy
-    @Default(.autoCopyOCRText) private var autoCopyOCRText
     @Default(.autoCopySelectedText) private var autoCopySelectedText
     @Default(.autoCopyFirstTranslatedText) private var autoCopyFirstTranslatedText
 
     // Quick link
     @Default(.showGoogleQuickLink) private var showGoogleQuickLink
     @Default(.showEudicQuickLink) private var showEudicQuickLink
-    @Default(.showAppleDictionaryQuickLink) private var showAppleDictionaryQuickLink
     @Default(.showQuickActionButton) private var showQuickActionButton
 
     @Default(.appearanceType) private var appearanceType

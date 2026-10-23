@@ -13,12 +13,10 @@
 #import "EZSelectLanguageCell.h"
 #import "EZCoordinateUtils.h"
 #import "EZEnumTypes.h"
-#import "EZAudioPlayer.h"
 #import "EZTableRowView.h"
 #import "EZQueryTableView.h"
 #import "EZSchemeParser.h"
 #import "EZToast.h"
-#import "DictionaryKit.h"
 #import "EZWebViewManager.h"
 
 
@@ -66,11 +64,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 
 @property (nonatomic, strong) EZQueryService *firstService;
 
-@property (nonatomic, strong) EZQueryService *defaultTTSService;
-@property (nonatomic, strong) EZQueryService *youdaoService;
-
 @property (nonatomic, strong) EZDetectManager *detectManager;
-@property (nonatomic, strong) EZAudioPlayer *audioPlayer;
 @property (nonatomic, strong) EZSchemeParser *schemeParser;
 
 @property (nonatomic, assign) BOOL isUpdatingWindowFrameInternally;
@@ -261,31 +255,16 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     NSMutableArray *serviceTypeIds = [NSMutableArray array];
     NSMutableArray *services = [NSMutableArray array];
 
-    self.youdaoService = nil;
-    _defaultTTSService = nil;
-    EZServiceType defaultTTSServiceType = self.config.defaultTTSServiceType;
-
     for (EZQueryService *service in allServices) {
         if (service.enabled) {
             [self resetService:service];
 
             [services addObject:service];
-            [serviceTypeIds addObject:service.serviceTypeWithUniqueIdentifier];
-        }
-
-        EZServiceType serviceType = service.serviceType;
-        if ([serviceType isEqualToString:EZServiceTypeYoudao]) {
-            self.youdaoService = service;
-        }
-
-        if ([serviceType isEqualToString:defaultTTSServiceType]) {
-            _defaultTTSService = service;
+            [serviceTypeIds addObject:service.serviceType];
         }
     }
     self.services = services;
     self.serviceTypeIds = serviceTypeIds;
-
-    self.audioPlayer = [[EZAudioPlayer alloc] init];
 }
 
 - (void)dealloc {
@@ -415,13 +394,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     return _schemeParser;
 }
 
-- (EZAudioPlayer *)audioPlayer {
-    if (!_audioPlayer) {
-        _audioPlayer = [[EZAudioPlayer alloc] init];
-    }
-    return _audioPlayer;
-}
-
 - (void)setInputText:(NSString *)inputText {
     // !!!: Rewrite property copy setter. Avoid text being affected.
     _inputText = [inputText copy];
@@ -437,37 +409,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     return queryText;
 }
 
-- (EZQueryService *)defaultTTSService {
-    EZServiceType defaultTTSServiceType = self.config.defaultTTSServiceType;
-    if (![_defaultTTSService.serviceType isEqualToString:defaultTTSServiceType]) {
-        _defaultTTSService = [QueryServiceFactory.shared serviceWithTypeId:defaultTTSServiceType];
-    }
-    return _defaultTTSService;
-}
-
 #pragma mark - Public Methods
-
-/// Recreate the query model and rebind dependent managers for background OCR.
-- (void)resetQueryModelForBackgroundOCR {
-    EZQueryModel *model = [[EZQueryModel alloc] init];
-    model.userSourceLanguage = MyConfiguration.shared.fromLanguage;
-    model.userTargetLanguage = MyConfiguration.shared.toLanguage;
-
-    self.queryModel = model;
-    self.detectManager = [EZDetectManager managerWithModel:model];
-
-    for (EZQueryService *service in self.services) {
-        service.queryModel = model;
-    }
-
-    if (self.queryView) {
-        self.queryView.queryModel = model;
-    }
-
-    if (self.selectLanguageCell) {
-        self.selectLanguageCell.queryModel = model;
-    }
-}
 
 /// Before starting query text, close all result view.
 - (void)startQueryText:(NSString *)text {
@@ -531,90 +473,8 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     return YES;
 }
 
-- (void)startOCRImage:(NSImage *)image
-           actionType:(EZActionType)actionType
-            autoQuery:(BOOL)autoQuery {
-    MMLogInfo(@"start OCR Image: %@, actionType: %@", @(image.size), actionType);
-    MMLogInfo(@"ocr language: %@", self.queryModel.queryFromLanguage);
-
-    self.queryModel.actionType = actionType;
-    self.queryModel.ocrImage = image;
-
-    self.queryView.isTypingChinese = NO;
-    [self.queryView startLoadingAnimation:YES];
-
-    mm_weakify(self);
-    [self.detectManager ocrAndDetectTextWithCompletion:^(EZQueryModel *_Nonnull queryModel, NSError *_Nullable error) {
-        mm_strongify(self);
-        // !!!: inputText should be used here, not queryText, queryText may be modified, such as easydict://query?text=xxx
-        NSString *inputText = queryModel.inputText;
-        MMLogInfo(@"ocr result: %@", inputText);
-
-        NSDictionary *dict = @{
-            @"detectedLanguage" : queryModel.detectedLanguage,
-            @"actionType" : actionType,
-        };
-        [EZAnalyticsService logEventWithName:@"ocr" parameters:dict];
-
-
-        if (actionType == EZActionTypeScreenshotOCR) {
-            [inputText copyToPasteboard];
-
-            dispatch_block_on_main_safely(^{
-                [EZToast showSuccessToast];
-            });
-
-            return;
-        }
-
-
-        if (actionType != EZActionTypeScreenshotOCR) {
-            [self.queryView startLoadingAnimation:NO];
-
-            self.inputText = inputText;
-
-            // Show detected language, even auto
-            self.queryModel.showAutoLanguage = YES;
-
-            [self updateQueryTextAndParagraphStyle:inputText actionType:actionType];
-
-            if (error) {
-                NSString *errorMsg = [error localizedDescription];
-                dispatch_block_on_main_safely(^{
-                    [EZToast showToast:errorMsg];
-                });
-                return;
-            }
-
-            if (self.config.autoCopyOCRText) {
-                [inputText copyToPasteboard];
-            }
-
-            [self.queryView highlightAllLinks];
-
-            if ([self.inputText ns_isURL]) {
-                // Append a whitespace to beautify the link.
-                self.inputText = [self.inputText stringByAppendingString:@" "];
-
-                return;
-            }
-
-            if (autoQuery) {
-                [self startQueryText];
-            }
-        }
-    }];
-}
-
 - (void)retryQueryWithLanguage:(EZLanguage)language {
     MMLogInfo(@"Retry query with language: %@", language);
-
-    [self.audioPlayer stop];
-
-    // Reset query view height if we are retrying OCR query
-    if (self.queryModel.ocrImage) {
-        self.inputText = @"";
-    }
 
     // If has designated language, we don't need to detect language again.
     if (language == EZLanguageAuto) {
@@ -650,10 +510,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 - (void)clearInput {
     // Clear query text, detect language and clear button right now;
     self.inputText = @"";
-    self.queryModel.ocrImage = nil;
     [self.queryView setAlertTextHidden:YES];
-
-    [self.audioPlayer stop];
 }
 
 - (void)clearAll {
@@ -701,7 +558,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
         if (bothAutomatic) {
             // Re-query the translation using Auto without changing language preferences.
             if ([translatedText ns_trim].length > 0) {
-                self.queryModel.ocrImage = nil;
                 [self startQueryText:translatedText actionType:EZActionTypeInputQuery];
             }
             return;
@@ -718,63 +574,11 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
             self.queryModel.userSourceLanguage = fromLanguage;
             self.queryModel.userTargetLanguage = toLanguage;
             self.inputText = translatedText;
-            self.queryModel.ocrImage = nil;
             self.queryModel.actionType = EZActionTypeInputQuery;
         }
     }
 
     [self.selectLanguageCell toggleTranslationLanguages];
-}
-
-- (void)stopPlayingQueryText {
-    [self togglePlayQueryText:NO];
-    [self stopAllResultAudio];
-}
-
-- (void)togglePlayQueryText {
-    BOOL isPlaying = self.audioPlayer.isPlaying;
-    [self togglePlayQueryText:!isPlaying];
-}
-
-- (void)togglePlayQueryText:(BOOL)play {
-    if (!play) {
-        [self.audioPlayer stop];
-        return;
-    }
-
-    void (^playAudioBlock)(void) = ^{
-        NSString *queryText = self.queryText;
-        NSString *textLanguage = self.queryModel.queryFromLanguage;
-        BOOL isEnglishWord = [queryText isEnglishWordWithLanguage:textLanguage];
-
-        // If query text is an English word, prefer Youdao TTS for its high-quality
-        // dictionary recordings. Users on slow or restricted networks can disable
-        // this in Advanced settings to fall back to their default TTS service.
-        BOOL preferYoudao = self.config.preferYoudaoTTSForEnglishWord;
-        EZQueryService *ttsService = (isEnglishWord && preferYoudao) ? self.youdaoService : self.defaultTTSService;
-        NSString *accent = self.config.pronunciation == EnglishPronunciationUk ? @"uk" : @"us";
-
-        [self.audioPlayer playTextAudio:queryText
-                               language:textLanguage
-                                 accent:accent
-                               audioURL:nil
-                      designatedService:ttsService];
-    };
-
-    // Before playing audio, we should detect the query text language.
-    if (self.queryModel.hasQueryFromLanguage) {
-        playAudioBlock();
-    } else {
-        [self detectQueryText:^(NSString *_Nonnull language) {
-            playAudioBlock();
-        }];
-    }
-}
-
-- (void)stopAllResultAudio {
-    for (EZQueryService *service in self.services) {
-        [service.audioPlayer stop];
-    }
 }
 
 /// Update query text, auto adjust ParagraphStyle, and scroll to end of textView.
@@ -821,14 +625,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 }
 
 - (void)startQueryWithType:(EZActionType)actionType {
-    NSImage *ocrImage = self.queryModel.ocrImage;
-
-    if (ocrImage && (actionType == EZActionTypeOCRQuery || actionType == EZActionTypePasteboardOCR)) {
-        BOOL autoQuery = self.config.autoCopyOCRText || self.config.autoQueryPastedText || self.queryModel.autoQuery;
-        [self startOCRImage:ocrImage actionType:actionType autoQuery:autoQuery];
-    } else {
-        [self startQueryText:self.inputText actionType:actionType];
-    }
+    [self startQueryText:self.inputText actionType:actionType];
 }
 
 /// Directly query model.
@@ -859,7 +656,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     for (EZQueryService *service in self.services) {
         BOOL enableAutoQuery = service.enabledQuery && service.enabledAutoQuery && service.supportedQueryType != EZQueryTextTypeNone;
         if (!enableAutoQuery) {
-            MMLogInfo(@"service disabled: %@", service.serviceTypeWithUniqueIdentifier);
+            MMLogInfo(@"service disabled: %@", service.serviceType);
             continue;
         }
 
@@ -878,9 +675,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
                                          fromLanguage:queryModel.queryFromLanguage
                                            toLanguage:queryModel.queryTargetLanguage
                                                    to:RecordTypeHistory];
-
-    // Auto play query text if it is an English word.
-    [self autoPlayEnglishWordAudio];
 }
 
 - (void)queryWithModel:(EZQueryModel *)queryModel service:(EZQueryService *)service {
@@ -940,7 +734,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
                service:(EZQueryService *)service
             completion:(nonnull void (^)(EZQueryResult *result, NSError *_Nullable error))completion {
     if (!service.enabledQuery) {
-        MMLogWarn(@"service disabled: %@", service.serviceTypeWithUniqueIdentifier);
+        MMLogWarn(@"service disabled: %@", service.serviceType);
         return;
     }
     if (queryModel.queryText.length == 0) {
@@ -1241,9 +1035,9 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 
 /// !!!: Maybe return NSNotFound
 - (NSUInteger)rowIndexOfResult:(EZQueryResult *)result {
-    NSString *serviceTypeWithUniqueIdentifier = result.serviceTypeWithUniqueIdentifier;
+    NSString *serviceTypeId = result.serviceTypeId;
     // Sometimes the query is very slow, and at that time the user may have turned off the service in the settings page.
-    NSInteger row = [self.serviceTypeIds indexOfObject:serviceTypeWithUniqueIdentifier];
+    NSInteger row = [self.serviceTypeIds indexOfObject:serviceTypeId];
     return row;
 }
 
@@ -1270,16 +1064,16 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     service.windowType = self.windowType;
 }
 
-- (void)updateService:(NSString *)serviceTypeWithUniqueIdentifier autoQuery:(BOOL)autoQuery {
+- (void)updateService:(NSString *)serviceTypeId autoQuery:(BOOL)autoQuery {
     NSMutableArray *newServices = [self.services mutableCopy];
     for (EZQueryService *service in self.services) {
-        if ([service.serviceTypeWithUniqueIdentifier isEqualToString:serviceTypeWithUniqueIdentifier]) {
+        if ([service.serviceType isEqualToString:serviceTypeId]) {
             if (!autoQuery) {
                 [self updateCellWithResult:service.result reloadData:YES completionHandler:nil];
                 return;
             }
 
-            EZQueryService *updatedService = [EZLocalStorage.shared service:serviceTypeWithUniqueIdentifier windowType:self.windowType];
+            EZQueryService *updatedService = [EZLocalStorage.shared service:serviceTypeId windowType:self.windowType];
             if (!updatedService) {
                 return;
             }
@@ -1289,7 +1083,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
                 [((EZStreamService *)service) cancelSubscribers];
             }
 
-            NSInteger index = [self.serviceTypeIds indexOfObject:serviceTypeWithUniqueIdentifier];
+            NSInteger index = [self.serviceTypeIds indexOfObject:serviceTypeId];
             newServices[index] = updatedService;
             self.services = newServices.copy;
 
@@ -1345,7 +1139,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 }
 
 - (nullable EZResultView *)resultCellOfResult:(EZQueryResult *)result {
-    NSInteger index = [self.serviceTypeIds indexOfObject:result.serviceTypeWithUniqueIdentifier];
+    NSInteger index = [self.serviceTypeIds indexOfObject:result.serviceTypeId];
     if (index != NSNotFound) {
         NSInteger row = index + [self resultCellOffset];
         EZResultView *resultCell = [[[self.tableView rowViewAtRow:row makeIfNecessary:NO] subviews] firstObject];
@@ -1466,8 +1260,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     }
     queryView.placeholderText = placeholderText;
 
-    queryView.audioButton.audioPlayer = self.audioPlayer;
-
     mm_weakify(self);
     [queryView setUpdateInputTextBlock:^(NSString *text, CGFloat queryViewHeight) {
         mm_strongify(self);
@@ -1505,11 +1297,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
         if (autoQuery) {
             [self startQueryText:text];
         }
-    }];
-
-    [queryView setPlayAudioBlock:^(NSString *text) {
-        mm_strongify(self);
-        [self togglePlayQueryText];
     }];
 
     [queryView setCopyTextBlock:^(NSString *text) {
@@ -1557,27 +1344,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     [self setupResultCell:resultCell];
 
     WKWebView *webView = nil;
-    if ([service.serviceType isEqualToString:EZServiceTypeAppleDictionary]) {
-        EZWebViewManager *webViewManager = result.webViewManager;
-        BOOL shouldRenderHTML = EZResultShouldRenderDictionaryHTML(result);
-        BOOL htmlChanged = ![webViewManager.loadedHTMLString isEqualToString:result.htmlString];
-        BOOL needLoadHTML = shouldRenderHTML && (!webViewManager.isLoaded || htmlChanged);
-        BOOL needUpdateIframe = shouldRenderHTML && webViewManager.needUpdateIframeHeight && webViewManager.isLoaded;
-        if (needLoadHTML || needUpdateIframe) {
-            webView = webViewManager.webView;
-            resultCell.wordResultView.webView = webView;
-        }
-
-        if (needLoadHTML) {
-            NSUInteger renderGeneration = [webViewManager beginRenderingHTML];
-            webViewManager.isLoaded = YES;
-            webViewManager.loadedHTMLString = result.htmlString;
-            WKNavigation *navigation = [webView loadHTMLString:result.htmlString baseURL:nil];
-            [webViewManager trackRenderingNavigation:navigation renderGeneration:renderGeneration];
-        } else if (needUpdateIframe) {
-            [webViewManager updateAllIframe];
-        }
-    } else if ([service.serviceType isEqualToString:EZServiceTypeMDict] ||
+    if ([service.serviceType isEqualToString:EZServiceTypeMDict] ||
                [service.serviceType isEqualToString:EZServiceTypeReading]) {
         EZWebViewManager *webViewManager = result.webViewManager;
         BOOL shouldRenderHTML = EZResultShouldRenderDictionaryHTML(result);
@@ -1607,7 +1374,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
 /// Configure callbacks for a reusable result cell.
 - (void)setupResultCell:(EZResultView *)resultView {
     EZQueryResult *result = resultView.result;
-    EZQueryService *service = [self serviceWithType:result.serviceTypeWithUniqueIdentifier];
+    EZQueryService *service = [self serviceWithType:result.serviceTypeId];
     if (!service) {
         return;
     }
@@ -1627,10 +1394,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     [resultView setClickArrowBlock:^(EZQueryResult *newResult) {
         mm_strongify(self);
         BOOL isShowing = newResult.isShowing;
-
-        if (!isShowing) {
-            [service.audioPlayer stop];
-        }
 
         service.enabledQuery = isShowing;
         [self handleArrowToggleForResult:newResult service:service isShowing:isShowing];
@@ -1692,7 +1455,7 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
                                    result:(EZQueryResult *)result
                                 queryText:(NSString *)queryText {
     // Language detection may finish after input changes or service reloads.
-    EZQueryService *currentService = [self serviceWithType:service.serviceTypeWithUniqueIdentifier];
+    EZQueryService *currentService = [self serviceWithType:service.serviceType];
     NSString *currentQueryText = self.queryModel.queryText ?: @"";
     return currentService == service
         && result.isShowing
@@ -1971,22 +1734,6 @@ static BOOL ez_frame_equal_with_tolerance(CGRect lhs, CGRect rhs, CGFloat tolera
     CGFloat miniInputViewHeight = [[EZLayoutManager shared] inputViewMinHeight:self.windowType];
     CGFloat queryViewHeight = miniInputViewHeight + EZQueryViewExceptInputViewHeight;
     return queryViewHeight;
-}
-
-#pragma mark - Auto play English word
-
-- (void)autoPlayEnglishWordAudio {
-    if (!self.config.autoPlayAudio) {
-        return;
-    }
-
-    BOOL isEnglishWord = [self.queryText isEnglishWordWithLanguage:self.queryModel.queryFromLanguage];
-    if (!isEnglishWord) {
-        return;
-    }
-
-    MMLogInfo(@"Auto play English word audio: %@", self.queryText);
-    [self togglePlayQueryText:YES];
 }
 
 #pragma mark -

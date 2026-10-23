@@ -23,17 +23,12 @@ public enum ShortcutAction: String, Identifiable, CaseIterable {
     case pasteboardTranslate
     case translateAndReplace
 
-    // OCR specific shortcuts
-    case pasteboardOCR
-    case showOCRWindow
-
     // In App shortcuts
     case clearInput
     case clearAll
     case copy
     case copyFirstResult
     case focus
-    case play
     case retry
     case toggle
     case pin
@@ -42,7 +37,6 @@ public enum ShortcutAction: String, Identifiable, CaseIterable {
     case decreaseFontSize
     case google
     case eudic
-    case appleDic
 
     // MARK: Public
 
@@ -58,8 +52,6 @@ extension ShortcutAction {
         .showMiniWindow,
         .pasteboardTranslate,
         .translateAndReplace,
-        .pasteboardOCR,
-        .showOCRWindow,
     ]
 
     /// All app-specific shortcut actions (only active when app is focused)
@@ -160,20 +152,6 @@ extension ShortcutAction {
                 action: { windowManager.showMiniFloatingWindow() }
             ),
 
-            // OCR specific shortcuts
-            .pasteboardOCR: .init(
-                titleKey: "menu_pasteboard_OCR",
-                icon: .listClipboard,
-                defaultsKey: .pasteboardOCRShortcut,
-                action: { AppleOCREngine().pasteboardOCR() }
-            ),
-            .showOCRWindow: .init(
-                titleKey: "menu_show_ocr_window",
-                icon: .textAndCommandMacwindow,
-                defaultsKey: .showOCRWindowShortcut,
-                action: { OCRWindowManager.shared.showWindow() }
-            ),
-
             // In App shortcuts
             .clearInput: .init(
                 titleKey: "shortcut_clear_input",
@@ -205,12 +183,6 @@ extension ShortcutAction {
                 defaultsKey: .focusShortcut,
                 action: { windowManager.focusInputTextView() }
             ),
-            .play: .init(
-                titleKey: "shortcut_play",
-                icon: .playFill,
-                defaultsKey: .playShortcut,
-                action: { windowManager.playOrStopQueryTextAudio() }
-            ),
             .retry: .init(
                 titleKey: "retry",
                 icon: .arrowClockwise,
@@ -233,7 +205,7 @@ extension ShortcutAction {
                 titleKey: "hide",
                 icon: .eyeSlash,
                 defaultsKey: .hideShortcut,
-                action: { windowManager.closeWindowOrExitSreenshot() }
+                action: { windowManager.closeFloatingWindow() }
             ),
             .increaseFontSize: .init(
                 titleKey: "shortcut_increase_font",
@@ -271,15 +243,6 @@ extension ShortcutAction {
                 action: {
                     let window = windowManager.floatingWindow
                     window?.titleBar.eudicButton.openLink()
-                }
-            ),
-            .appleDic: .init(
-                titleKey: "open_in_apple_dictionary",
-                icon: .book,
-                defaultsKey: .appleDictionaryShortcut,
-                action: {
-                    let window = windowManager.floatingWindow
-                    window?.titleBar.appleDictionaryButton.openLink()
                 }
             ),
         ]

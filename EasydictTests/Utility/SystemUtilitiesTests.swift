@@ -16,21 +16,6 @@ import Testing
 struct SystemUtilitiesTests {
     let systemUtility = SystemUtility.shared
 
-    @Test("Alert Volume Control", .tags(.system))
-    func testAlertVolume() async throws {
-        let originalVolume = try await AppleScriptTask.alertVolume()
-        print("Original volume: \(originalVolume)")
-
-        let testVolume = 50
-        try await AppleScriptTask.setAlertVolume(testVolume)
-
-        let newVolume = try await AppleScriptTask.alertVolume()
-        #expect(newVolume == testVolume)
-
-        try await AppleScriptTask.setAlertVolume(originalVolume)
-        #expect(true, "Alert volume test completed")
-    }
-
     @Test(
         "Get Selected Text",
         .tags(.system, .performance),

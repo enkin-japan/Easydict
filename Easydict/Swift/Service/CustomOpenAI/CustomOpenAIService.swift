@@ -54,21 +54,6 @@ class CustomOpenAIService: BaseOpenAIService {
         await OllamaThinkingProbe.capability(endpoint: endpoint, model: model, localOnly: true, refresh: refresh)
     }
 
-    override func serviceTypeWithUniqueIdentifier() -> String {
-        guard !uuid.isEmpty else {
-            return ServiceType.customOpenAI.rawValue
-        }
-        return "\(ServiceType.customOpenAI.rawValue)#\(uuid)"
-    }
-
-    override func isDuplicatable() -> Bool {
-        true
-    }
-
-    override func isDeletable(_ type: EZWindowType) -> Bool {
-        !uuid.isEmpty
-    }
-
     override func configurationListItems() -> Any {
         StreamConfigurationView(
             service: self,

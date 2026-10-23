@@ -442,11 +442,6 @@ struct AppleLanguageDetectorTests {
     func testCatalanLanguageCodeMapping() {
         #expect(Language.language(fromCode: "ca") == .catalan)
         #expect(AppleLanguageMapper.shared.languageCode(for: .catalan) == "ca")
-        #expect(GoogleService().languageCode(for: .catalan) == "ca")
-        #expect(GoogleService().language(fromCode: "ca") == .catalan)
-        #expect(BingService().languageCode(forLanguage: .catalan) == "ca")
-        #expect(BaiduService().languageCode(forLanguage: .catalan) == "cat")
-        #expect(DeepLService().languageCode(for: .catalan) == "ca")
     }
 
     @Test("Brazilian Portuguese Language Code Mapping", .tags(.apple, .unit))
@@ -454,9 +449,6 @@ struct AppleLanguageDetectorTests {
         let mapper = AppleLanguageMapper.shared
         #expect(mapper.supportedLanguages[.brazilianPortuguese] == "pt_BR")
         #expect(mapper.supportedLanguages[.portuguese] == "pt_PT")
-        #expect(mapper.shortcutLanguageCode(for: .portuguese) == "pt_BR")
-        #expect(mapper.shortcutLanguageCode(for: .brazilianPortuguese) == "pt_BR")
-        #expect(mapper.shortcutLanguageCode(for: .english) == "en_US")
         #expect(mapper.languageCode(for: .brazilianPortuguese) == "pt-BR")
         #expect(mapper.languageCode(for: .portuguese) == "pt-PT")
         #expect(mapper.language(for: "pt_BR") == .brazilianPortuguese)

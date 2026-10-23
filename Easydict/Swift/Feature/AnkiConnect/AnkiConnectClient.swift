@@ -319,7 +319,7 @@ enum AnkiTemplateRenderer {
     }
 
     private static func dictionaryText(from result: QueryResult) -> String? {
-        if result.serviceTypeWithUniqueIdentifier == ServiceType.mDict.rawValue {
+        if result.serviceTypeId == ServiceType.mDict.rawValue {
             return result.copiedText?.trimmed.nonEmpty
         }
 
@@ -353,8 +353,7 @@ enum AnkiTemplateRenderer {
     }
 
     private static func prefersRenderedDictionaryHTML(_ result: QueryResult) -> Bool {
-        result.serviceTypeWithUniqueIdentifier == ServiceType.appleDictionary.rawValue ||
-            result.serviceTypeWithUniqueIdentifier == ServiceType.mDict.rawValue
+        result.serviceTypeId == ServiceType.mDict.rawValue
     }
 
     private static func wordResultText(from wordResult: EZTranslateWordResult?) -> String? {

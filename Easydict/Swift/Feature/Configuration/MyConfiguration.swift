@@ -10,23 +10,6 @@ import Combine
 import Defaults
 import Foundation
 
-// MARK: - LanguageDetectOptimize
-
-@objc
-enum LanguageDetectOptimize: Int {
-    case none = 0
-    case baidu = 1
-    case google = 2
-}
-
-// MARK: - EnglishPronunciation
-
-@objc
-enum EnglishPronunciation: Int {
-    case uk = 1
-    case us
-}
-
 // MARK: - MyConfiguration
 
 /// Singleton class to manage application configuration settings.
@@ -52,7 +35,6 @@ class MyConfiguration: NSObject {
     @DefaultsWrapper(.secondLanguage) var secondLanguage: Language
     @DefaultsWrapper(.queryFromLanguage) var fromLanguage: Language
     @DefaultsWrapper(.queryToLanguage) var toLanguage: Language
-    @DefaultsWrapper(.languageDetectOptimize) var languageDetectOptimize: LanguageDetectOptimize
 
     @DefaultsWrapper(.autoShowQueryIcon) var autoSelectText: Bool
     @DefaultsWrapper(.autoShowQueryIconExcludedLanguage) var autoShowQueryIconExcludedLanguage: Language
@@ -78,19 +60,14 @@ class MyConfiguration: NSObject {
     @DefaultsWrapper(.replaceNewlineWithSpace) var replaceNewlineWithSpace: Bool
     @DefaultsWrapper(.enableRemoveBooksExcerptInfo) var enableRemoveBooksExcerptInfo: Bool
 
-    @DefaultsWrapper(.autoQueryOCRText) var autoQueryOCRText: Bool
     @DefaultsWrapper(.autoQuerySelectedText) var autoQuerySelectedText: Bool
     @DefaultsWrapper(.autoQueryPastedText) var autoQueryPastedText: Bool
     @DefaultsWrapper(.autoQueryWhenTextChanged) var autoQueryWhenTextChanged: Bool
-    @DefaultsWrapper(.autoPlayAudio) var autoPlayAudio: Bool
-    @DefaultsWrapper(.pronunciation) var pronunciation: EnglishPronunciation
     @DefaultsWrapper(.autoCopySelectedText) var autoCopySelectedText: Bool
-    @DefaultsWrapper(.autoCopyOCRText) var autoCopyOCRText: Bool
     @DefaultsWrapper(.autoCopyFirstTranslatedText) var autoCopyFirstTranslatedText: Bool
 
     @DefaultsWrapper(.showGoogleQuickLink) var showGoogleQuickLink: Bool
     @DefaultsWrapper(.showEudicQuickLink) var showEudicQuickLink: Bool
-    @DefaultsWrapper(.showAppleDictionaryQuickLink) var showAppleDictionaryQuickLink: Bool
     @DefaultsWrapper(.showQuickActionButton) var showQuickActionButton: Bool
 
     @DefaultsWrapper(.appearanceType) var appearance: AppearanceType
@@ -99,15 +76,10 @@ class MyConfiguration: NSObject {
     @DefaultsWrapper(.enableMarkdownRendering) var enableMarkdownRendering: Bool
 
     // Advanced Tab
-    @DefaultsWrapper(.enableBetaFeature) private(set) var beta: Bool
-    @DefaultsWrapper(.enableYoudaoOCR) var enableYoudaoOCR: Bool
     @DefaultsWrapper(.enableCompatibilityReplace) var enableCompatibilityReplace: Bool
     @DefaultsWrapper(.forceGetSelectedTextType) var forceGetSelectedTextType:
         ForceGetSelectedTextType
 
-    @DefaultsWrapper(.enableAppleOfflineTranslation) var enableAppleOfflineTranslation: Bool
-    @DefaultsWrapper(.enableOCRTextNormalization) var enableOCRTextNormalization: Bool
-    @DefaultsWrapper(.isScreenshotTipLayerHidden) var isScreenshotTipLayerHidden: Bool
     @DefaultsWrapper(.formerFixedScreenVisibleFrame) var formerFixedScreenVisibleFrame: CGRect
     @DefaultsWrapper(.formerMiniScreenVisibleFrame) var formerMiniScreenVisibleFrame: CGRect
     @DefaultsWrapper(.enableAnkiConnect) var enableAnkiConnect: Bool
@@ -120,7 +92,6 @@ class MyConfiguration: NSObject {
 
     @ShortcutWrapper(.pinShortcut) var pinShortcutString: String
     @ShortcutWrapper(.googleShortcut) var googleShortcutString: String
-    @ShortcutWrapper(.appleDictionaryShortcut) var appleDictShortcutString: String
     @ShortcutWrapper(.eudicShortcut) var eudicDictShortcutString: String
 
     let updater = GlobalContext.shared.updaterController.updater
@@ -128,9 +99,6 @@ class MyConfiguration: NSObject {
     var disabledAutoSelect: Bool = false
     var isRecordingSelectTextShortcutKey: Bool = false
     var cancellables: Set<AnyCancellable> = []
-
-    /// Slim build: Youdao online word audio is not used.
-    var preferYoudaoTTSForEnglishWord: Bool { false }
 
     /// Slim build: AppleScript is never used.
     var preferAppleScriptAPI: Bool { false }
@@ -140,22 +108,8 @@ class MyConfiguration: NSObject {
         return fontSizes[safeIndex]
     }
 
-    /// Slim build: system TTS only (offline, no network).
-    var defaultTTSServiceType: ServiceType {
-        get {
-            ServiceType(rawValue: TTSServiceType.apple.rawValue)
-        }
-        set {
-            Defaults[.defaultTTSServiceType] = .apple
-        }
-    }
-
     static func destroySharedInstance() {
         shared = MyConfiguration()
-    }
-
-    func enableBetaFeaturesIfNeeded() {
-        guard beta else { return }
     }
 
     // MARK: Private
@@ -226,14 +180,6 @@ class MyConfiguration: NSObject {
             }
             .store(in: &cancellables)
 
-        Defaults.publisher(.autoQueryOCRText, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetAutoQueryOCRText()
-            }
-            .store(in: &cancellables)
-
         Defaults.publisher(.autoQuerySelectedText, options: [])
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
@@ -250,22 +196,6 @@ class MyConfiguration: NSObject {
             }
             .store(in: &cancellables)
 
-        Defaults.publisher(.autoPlayAudio, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetAutoPlayAudio()
-            }
-            .store(in: &cancellables)
-
-        Defaults.publisher(.pronunciation, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetPronunciation()
-            }
-            .store(in: &cancellables)
-
         Defaults.publisher(.autoCopySelectedText, options: [])
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
@@ -274,35 +204,11 @@ class MyConfiguration: NSObject {
             }
             .store(in: &cancellables)
 
-        Defaults.publisher(.autoCopyOCRText, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetAutoCopyOCRText()
-            }
-            .store(in: &cancellables)
-
         Defaults.publisher(.autoCopyFirstTranslatedText, options: [])
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.didSetAutoCopyFirstTranslatedText()
-            }
-            .store(in: &cancellables)
-
-        Defaults.publisher(.languageDetectOptimize, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetLanguageDetectOptimize()
-            }
-            .store(in: &cancellables)
-
-        Defaults.publisher(.defaultTTSServiceType, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetDefaultTTSServiceType()
             }
             .store(in: &cancellables)
 
@@ -319,14 +225,6 @@ class MyConfiguration: NSObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.didSetShowEudicQuickLink()
-            }
-            .store(in: &cancellables)
-
-        Defaults.publisher(.showAppleDictionaryQuickLink, options: [])
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.didSetShowAppleDictionaryQuickLink()
             }
             .store(in: &cancellables)
 
@@ -414,7 +312,6 @@ class MyConfiguration: NSObject {
         Defaults.publisher(
             keys: [
                 .pinShortcut,
-                .appleDictionaryShortcut,
                 .googleShortcut,
                 .eudicShortcut,
             ],
@@ -473,10 +370,6 @@ extension MyConfiguration {
         logSettings(["hide_main_window": hideMainWindow])
     }
 
-    fileprivate func didSetAutoQueryOCRText() {
-        logSettings(["auto_query_ocr_text": autoQueryOCRText])
-    }
-
     fileprivate func didSetAutoQuerySelectedText() {
         logSettings(["auto_query_selected_text": autoQuerySelectedText])
     }
@@ -485,33 +378,12 @@ extension MyConfiguration {
         logSettings(["auto_query_pasted_text": autoQueryPastedText])
     }
 
-    fileprivate func didSetAutoPlayAudio() {
-        logSettings(["auto_play_word_audio": autoPlayAudio])
-    }
-
-    fileprivate func didSetPronunciation() {
-        logSettings(["english_pronunciation": pronunciation])
-    }
-
     fileprivate func didSetAutoCopySelectedText() {
         logSettings(["auto_copy_selected_text": autoCopySelectedText])
     }
 
-    fileprivate func didSetAutoCopyOCRText() {
-        logSettings(["auto_copy_ocr_text": autoCopyOCRText])
-    }
-
     fileprivate func didSetAutoCopyFirstTranslatedText() {
         logSettings(["auto_copy_first_translated_text": autoCopyFirstTranslatedText])
-    }
-
-    fileprivate func didSetLanguageDetectOptimize() {
-        logSettings(["detect_optimize": languageDetectOptimize])
-    }
-
-    fileprivate func didSetDefaultTTSServiceType() {
-        let value = defaultTTSServiceType
-        logSettings(["tts": value])
     }
 
     fileprivate func didSetShowGoogleQuickLink() {
@@ -522,11 +394,6 @@ extension MyConfiguration {
     fileprivate func didSetShowEudicQuickLink() {
         postUpdateQuickLinkButtonNotification()
         logSettings(["show_eudic_link": showEudicQuickLink])
-    }
-
-    fileprivate func didSetShowAppleDictionaryQuickLink() {
-        postUpdateQuickLinkButtonNotification()
-        logSettings(["show_apple_dictionary_link": showAppleDictionaryQuickLink])
     }
 
     func didSetShowSettingQuickLink() {

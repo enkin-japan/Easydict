@@ -34,11 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)resetTableView:(nullable void (^)(void))completion;
 
-/// Recreate the query model and rebind dependent managers for background OCR.
-- (void)resetQueryModelForBackgroundOCR;
-
 - (void)startQueryText:(nullable NSString *)text actionType:(EZActionType)actionType;
-- (void)startOCRImage:(NSImage *)image actionType:(EZActionType)actionType autoQuery:(BOOL)autoQuery;
 
 - (void)retryQueryWithLanguage:(EZLanguage)language;
 
@@ -58,10 +54,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// Cancel the pending auto-query-while-typing debounce.
 - (void)cancelAutoQuery;
-
-- (void)stopPlayingQueryText;
-- (void)togglePlayQueryText;
-- (void)togglePlayQueryText:(BOOL)playFlag;
 
 /// Detect query text, and update select language cell.
 - (void)detectQueryText:(nullable void (^)(NSString *language))completion;

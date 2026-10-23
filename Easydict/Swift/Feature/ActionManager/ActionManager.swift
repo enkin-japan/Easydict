@@ -35,15 +35,12 @@ class ActionManager: NSObject {
     /// Translates `text` with the first enabled AI service and returns the full result.
     /// Used by the macOS Services menu ("Translate and Replace"), which needs the text synchronously.
     func translatedText(for text: String) async throws -> String {
-        guard let request = await prepareTranslationRequest(queryText: text, type: .translate),
-              let service = QueryServiceFactory.shared.service(withTypeId: request.serviceType)
-              as? StreamService
-        else {
-            throw QueryError(type: .api, message: "No enabled AI service (Custom OpenAI / OpenAI)")
+        guard let request = await prepareTranslationRequest(queryText: text, type: .translate) else {
+            throw QueryError(type: .api, message: "No enabled Custom OpenAI service")
         }
 
         var result = ""
-        for try await chunk in try await service.contentStreamTranslate(request: request) {
+        for try await chunk in request.contentStream() {
             result += chunk
         }
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -54,6 +51,20 @@ class ActionManager: NSObject {
     /// Type of text processing action
     private enum ProcessingType {
         case translate
+    }
+
+    /// Text to translate, its detected languages and the service that translates it.
+    private struct TranslationRequest {
+        let text: String
+        let from: Language
+        let to: Language
+        let service: StreamService
+
+        func contentStream() -> AsyncThrowingStream<String, Error> {
+            // Replacing text always wants a plain translation, never a dictionary entry.
+            service.queryType = .translation
+            return service.contentStreamTranslate(text, from: from, to: to)
+        }
     }
 
     private let systemUtility = SystemUtility.shared
@@ -118,24 +129,13 @@ class ActionManager: NSObject {
             return nil
         }
 
-        // Create base request
-        var request = TranslationRequest(
-            text: queryText,
-            sourceLanguage: detectedLanguage.code,
-            targetLanguage: targetLanguage.code,
-            serviceType: "",
-            queryType: .translation
-        )
-
-        // Slim build: use the first enabled AI service (Custom OpenAI or OpenAI)
-        // configured by the user.
+        // Slim build: use the Custom OpenAI service if it is enabled in any window.
         guard let service = Self.firstEnabledStreamService() else {
-            logError("No enabled AI service (Custom OpenAI / OpenAI) for \(type), skipping")
+            logError("No enabled Custom OpenAI service for \(type), skipping")
             return nil
         }
-        request.serviceType = service.serviceTypeWithUniqueIdentifier()
 
-        return request
+        return TranslationRequest(text: queryText, from: detectedLanguage, to: targetLanguage, service: service)
     }
 
     // MARK: - Streaming Service Methods
@@ -145,22 +145,11 @@ class ActionManager: NSObject {
         request: TranslationRequest,
         elementInfo: FocusedElementInfo
     ) async {
-        guard let service = QueryServiceFactory.shared.service(withTypeId: request.serviceType)
-        else {
-            logError("Service type \(request.serviceType) not found")
-            return
-        }
-
-        guard let streamService = service as? StreamService else {
-            logError("\(service.name()) does not support streaming")
-            return
-        }
-
-        logInfo("Using model: \(streamService.model)")
+        logInfo("Using model: \(request.service.model)")
 
         do {
             try Task.checkCancellation()
-            let contentStream = try await streamService.contentStreamTranslate(request: request)
+            let contentStream = request.contentStream()
             try Task.checkCancellation()
             await replaceTextWithStream(contentStream, elementInfo: elementInfo)
         } catch {

@@ -133,14 +133,11 @@ extension KeyHolderWrapper {
                 .showMiniWindow: DefaultsKeyWrapper(.showMiniWindowShortcut),
                 .pasteboardTranslate: DefaultsKeyWrapper(.pasteboardTranslateShortcut),
                 .translateAndReplace: DefaultsKeyWrapper(.translateAndReplaceShortcut),
-                .pasteboardOCR: DefaultsKeyWrapper(.pasteboardOCRShortcut),
-                .showOCRWindow: DefaultsKeyWrapper(.showOCRWindowShortcut),
                 .clearInput: DefaultsKeyWrapper(.clearInputShortcut),
                 .clearAll: DefaultsKeyWrapper(.clearAllShortcut),
                 .copy: DefaultsKeyWrapper(.copyShortcut),
                 .copyFirstResult: DefaultsKeyWrapper(.copyFirstResultShortcut),
                 .focus: DefaultsKeyWrapper(.focusShortcut),
-                .play: DefaultsKeyWrapper(.playShortcut),
                 .retry: DefaultsKeyWrapper(.retryShortcut),
                 .toggle: DefaultsKeyWrapper(.toggleShortcut),
                 .pin: DefaultsKeyWrapper(.pinShortcut),
@@ -149,7 +146,6 @@ extension KeyHolderWrapper {
                 .decreaseFontSize: DefaultsKeyWrapper(.decreaseFontSize),
                 .google: DefaultsKeyWrapper(.googleShortcut),
                 .eudic: DefaultsKeyWrapper(.eudicShortcut),
-                .appleDic: DefaultsKeyWrapper(.appleDictionaryShortcut),
             ]
         }
 

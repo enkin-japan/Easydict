@@ -1,7 +1,7 @@
 # Easydict 应用架构
 
-Easydict 是一款 macOS 词典和翻译应用，支持直接查词、文本翻译、划词翻译、
-OCR 截图翻译，以及多个翻译或 AI 服务提供商。
+Easydict 是一款 macOS 词典和翻译应用，支持直接查词、文本翻译和划词翻译。本 fork 的查询服务
+固定为注音、MDict 和一个自定义 OpenAI 兼容服务。
 
 应用支持 macOS 13.0 及更高版本。新的 UI 组件使用 SwiftUI；在平台集成需要时，
 保留现有的 AppKit 和 Objective-C 边界。

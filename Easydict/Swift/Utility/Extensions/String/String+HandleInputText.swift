@@ -103,10 +103,7 @@ extension NSString {
 
         // If text is a single English word, don't split it
         if (self as String).isSingleWord {
-            let isEnglishWord = AppleDictionary.shared.queryDictionary(
-                forText: queryText, language: .english
-            )
-            if !isEnglishWord {
+            if !EnglishWordChecker.isWord(queryText) {
                 if (self as String).hasQuotesPair {
                     queryText = queryText.tryToRemoveQuotes()
                 } else {

@@ -52,9 +52,6 @@ struct StreamConfigurationView: View {
         self.temperatureMaxValue = temperatureMaxValue
         self.showValidationButton = showValidationButton
 
-        // Disable user to edit built-in supported models.
-        self.isEditable = service.serviceType() != .builtInAI
-
         self._apiKey = .init(service.apiKeyKey)
         self._endpoint = .init(service.endpointKey)
         self._showCustomPromptTextEditor = .init(service.enableCustomPromptKey)
@@ -79,8 +76,6 @@ struct StreamConfigurationView: View {
     let temperatureMaxValue: Double
     let showStreamingToggle: Bool
     let showValidationButton: Bool
-
-    var isEditable = true
 
     @Default var apiKey: String
     @Default var endpoint: String
@@ -129,7 +124,6 @@ struct StreamConfigurationView: View {
                         minHeight: 55,
                         maxHeight: 100
                     )
-                    .disabled(!isEditable)
 
                     if canFetchModels {
                         Button {
@@ -242,18 +236,6 @@ struct StreamConfigurationView: View {
                     footnote: "service.configuration.custom_openai.enable_streaming.footnote"
                 )
             }
-
-            if !service.uuid.isEmpty {
-                LabeledContent {
-                    Text(verbatim: service.serviceTypeWithUniqueIdentifier())
-                        .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-                        .lineLimit(1)
-                } label: {
-                    Text("service.configuration.service_identifier.title")
-                }
-            }
         }
         .sheet(isPresented: $isFetchModelsPresented) {
             if service.canFetchRemoteModels {
@@ -276,12 +258,11 @@ struct StreamConfigurationView: View {
     @State private var isFetchModelsPresented = false
 
     private var canFetchModels: Bool {
-        isEditable && service.canFetchRemoteModels
+        service.canFetchRemoteModels
     }
 
     private var isFetchModelsDisabled: Bool {
         guard service.canFetchRemoteModels else { return true }
-        if !isEditable { return true }
         if service.apiKeyRequirement().needsUserProvidedKey, apiKey.trim().isEmpty {
             return true
         }
