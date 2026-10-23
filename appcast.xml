@@ -3,18 +3,19 @@
     <channel>
         <title>Easydict Slim</title>
         <item>
-            <title>2.25.0 (73)</title>
-            <pubDate>Fri, 23 Oct 2026 00:55:00 +0900</pubDate>
-            <description>&lt;h2&gt;Easydict Slim 2.25.0 (73)&lt;/h2&gt;
+            <title>2.25.0 (74)</title>
+            <pubDate>Fri, 23 Oct 2026 18:35:00 +0900</pubDate>
+            <description>&lt;h2&gt;Easydict Slim 2.25.0 (74)&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;修复本地 TTS 在输出设备闲置后开头被吞的问题：请求 TTS 时先唤醒输出设备。&lt;/li&gt;
-&lt;li&gt;获取模型列表改为替换，服务器已不再提供的旧模型会被移除。&lt;/li&gt;
+&lt;li&gt;删除发音、OCR、Apple 词典、官方 OpenAI、服务增删与多实例、Beta 功能。&lt;/li&gt;
+&lt;li&gt;查询服务固定为注音、MDict 和一个自定义 OpenAI，原有设置自动保留。&lt;/li&gt;
+&lt;li&gt;⌥S 只翻译剪贴板文字；划词拆分改用系统拼写词典判断单词。&lt;/li&gt;
 &lt;/ul&gt;</description>
-            <sparkle:version>73</sparkle:version>
+            <sparkle:version>74</sparkle:version>
             <sparkle:shortVersionString>2.25.0</sparkle:shortVersionString>
-            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.7</sparkle:fullReleaseNotesLink>
+            <sparkle:fullReleaseNotesLink>https://github.com/enkin-japan/Easydict/releases/tag/v2.25.0-slim.8</sparkle:fullReleaseNotesLink>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.7/Easydict.zip" length="25490566" type="application/octet-stream" sparkle:edSignature="H9x/xROu2+rK3ASG5tquXtjEd8FYe2NM5V1Cv177ueaSvd+o8q9TKf6GAIrI507QDpSxAYz2U9oviNA4sXHFAg=="/>
+            <enclosure url="https://github.com/enkin-japan/Easydict/releases/download/v2.25.0-slim.8/Easydict.zip" length="21684803" type="application/octet-stream" sparkle:edSignature="v31b5tPClQmP0K+xeC5lCLvvdPMBMYOweCgdTqoA9663/o5SXQirQ4MpI54m8E3WF96ezfy5DnP3Pp0h3RWiAA=="/>
         </item>
     </channel>
 </rss>

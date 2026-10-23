@@ -105,7 +105,8 @@ GitHub Release `v2.25.0-slim.8`（enkin-japan/Easydict）
   - 正式版设置里的地址 `http://colab-tts:8000` 已无法解析（服务器已改为 `colab-llm:8000`），查询报 DNS 错误。
   - 临时改成 `http://colab-llm:8000/v1/chat/completions` 后再查，没有报错。
 - 系统拼写检查与 Apple 词典的判断用 26 个样例对比过，见设计意图。
-- Release：见同任务提交后的发布记录。
+- Release：App 与 DMG 公证 Accepted，`spctl` 为 `Notarized Developer ID`；Release `v2.25.0-slim.8` 附 DMG
+  （SHA-256 `b8337174…2dd4`）与 Sparkle 更新包（21684803 字节，上一版为 25490566 字节），appcast 指向 build 74。
 - 未运行：
   - 集成测试 `ServiceTests`、`SystemUtilitiesTests`。
   - 设置界面的人工点击确认（无屏幕录制权限）。
